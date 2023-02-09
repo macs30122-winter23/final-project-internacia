@@ -22,5 +22,7 @@ def year_sort(filename):
     dataset.insert(5,"Sorted_Year",sorted_year)
     dataset.to_csv(filename,header=False, index=False)
 
+clean_data("AmericanPresidentVisit.csv")
+clean_data("AmericanSecretaryVisit.csv")
 year_sort("AmericanSecretaryVisit.csv")
 year_sort("AmericanPresidentVisit.csv")
