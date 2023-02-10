@@ -2,6 +2,9 @@ from bs4 import BeautifulSoup
 import requests
 import csv
 import time
+import re
+import pandas as pd
+import math
 
 # Hard coded parameters for secretary and president visits
 HEADER = "https://history.state.gov"
@@ -9,8 +12,8 @@ BODY_PRESIDENT = "/departmenthistory/travels/president/"
 BODY_SECRETARY = "/departmenthistory/travels/secretary/"
 URL_PRESIDENT = "https://history.state.gov/departmenthistory/travels/president"
 URL_SECRETARY = "https://history.state.gov/departmenthistory/travels/secretary"
-OUT_FILE_PRESIDENT = "./AmericanPresidentVisit.csv"
-OUT_FILE_SECRETARY = "./AmericanSecretaryVisit.csv"
+OUT_FILE_PRESIDENT = "./data/AmericanPresidentVisit.csv"
+OUT_FILE_SECRETARY = "./data/AmericanSecretaryVisit.csv"
 
 
 def get_travel_info(url_header, url_body, url, csv_filename):
@@ -117,8 +120,27 @@ def crawl_and_scrape_travels(url_list):
         time.sleep(21)  # time delay of at least 20 sec between scraping
     return out
 
+def add_year_columns(csv_filename):
+    """
+    Adds year columns in the scraped data (csv files) in place.
+
+    Inputs:
+        - csv_filename (str): filename for csv file containing scraped data
+
+    Returns:
+        None
+    """
+    dataset = pd.read_csv(csv_filename)
+    dataset['year'] = dataset['time'].apply(lambda x:
+                                            int(re.findall(r'\d{4}', x)[0])
+                                            )
+    dataset["year_aggregate"] = dataset["year"].apply(lambda x:
+                                                      math.ceil(x/5) * 5
+                                                      )
 
 if __name__ == "__main__":
     # Call the travel_visit function to obtain the travel information.
     get_travel_info(HEADER, BODY_PRESIDENT, URL_PRESIDENT, OUT_FILE_PRESIDENT)
-    # get_travel_info(HEADER, BODY_SECRETARY, URL_SECRETARY, OUT_FILE_SECRETARY)
+    get_travel_info(HEADER, BODY_SECRETARY, URL_SECRETARY, OUT_FILE_SECRETARY)
+    for csv_file in [OUT_FILE_PRESIDENT, OUT_FILE_SECRETARY]:
+        add_year_columns(csv_file)
