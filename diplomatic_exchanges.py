@@ -10,7 +10,7 @@ import warnings
 warnings.filterwarnings("ignore")
 import os
 
-def diplomatic_data_to_databse():
+def diplomatic_data_to_database():
     df = pd.read_csv('./data/Diplomatic_Exchange_2006v1.csv')
 
     # create a db to work with
