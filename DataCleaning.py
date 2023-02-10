@@ -1,28 +1,27 @@
+import re
 import pandas as pd
 import math
 
-def clean_data(filename):
-    dataset = pd.read_csv(filename,header=None)
-    year = []
-    for i in range (dataset.shape[0]):
-        info = dataset.iloc[i,3]
-        year.append(info[-4:-1]+info[-1])
-    year = pd.DataFrame(year)
-    dataset.insert(4,"Year",year)
-    dataset.to_csv(filename,header=False, index=False)
 
-def year_sort(filename):
-    dataset = pd.read_csv(filename, header=None)
-    sorted_year = []
-    for i in range (dataset.shape[0]):
-        year_new = dataset.iloc[i,4]
-        year_new = math.ceil(year_new/5)*5
-        sorted_year.append(year_new)
-    sorted_year = pd.DataFrame(sorted_year)
-    dataset.insert(5,"Sorted_Year",sorted_year)
-    dataset.to_csv(filename,header=False, index=False)
+def add_year_columns(csv_filename):
+    """
+    Adds year columns in the scraped data (csv files) in place.
 
-clean_data("AmericanPresidentVisit.csv")
-clean_data("AmericanSecretaryVisit.csv")
-year_sort("AmericanSecretaryVisit.csv")
-year_sort("AmericanPresidentVisit.csv")
+    Inputs:
+        - csv_filename (str): filename for csv file containing scraped data
+
+    Returns:
+        None
+    """
+    dataset = pd.read_csv(csv_filename)
+    dataset['year'] = dataset['time'].apply(lambda x:
+                                            int(re.findall(r'\d{4}', x)[0])
+                                            )
+    dataset["year_aggregate"] = dataset["year"].apply(lambda x:
+                                                      math.ceil(x/5) * 5
+                                                      )
+
+if __name__ == "__main__":
+    for csv_file in ["AmericanPresidentVisit.csv",
+                     "AmericanSecretaryVisit.csv"]:
+        add_year_columns(csv_file)
