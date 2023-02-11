@@ -60,7 +60,7 @@ def diplomatic_data_to_database():
         df_out['node_id'] = list(nodes)
         df_out['year'] = [year] * len(nodes)
         df_out['pagerank'] = [page_rank_scores_dict[i] for i in nodes]
-        df_out['betweenness'] = [page_rank_scores_dict[i] for i in nodes]
+        df_out['betweenness'] = [betweenness_dict[i] for i in nodes]
         df_out['closeness'] = [closeness_dict[i] for i in nodes]
         df_out['degree'] = [degree_dict[i] for i in nodes]
         df_out['in_degree'] = [in_degree_dict[i] for i in nodes]
