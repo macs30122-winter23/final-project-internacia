@@ -186,9 +186,37 @@ def create_all_centrality_measure_tables(conn, diplomatic_exchanges, to_csv):
     drop_tables(conn, centrality_table_names)  # drop intermediary tables
 
 
+def match_countries(target_countries, known_mismatches_corrected):
+    """
+    Match countries and known country codes.
+
+    Inputs:
+        - target_countries (set) set of countries to be matched with codes
+        - known_mismatches_corrected (dict) pre-known mismatches
+                                            mapped to correct country names
+
+    Returns
+        (dict) mapping from countries to coutnry codes
+    """
+    known_countries = set(COUNTRY_CODES_DICT.keys())
+    countries_to_codes_dict = {target_country:
+                                   COUNTRY_CODES_DICT[target_country]
+                               for known_country in known_countries
+                               for target_country in target_countries
+                               if jellyfish.jaro_winkler_similarity(
+            target_country, known_country) == 1
+                               }
+
+    for k in known_mismatches_corrected:
+        countries_to_codes_dict[k] \
+            = COUNTRY_CODES_DICT[known_mismatches_corrected[k]]
+
+    return countries_to_codes_dict
+
+
 def add_presidential_visits(conn):
     """
-    Add presidential visits to database.
+    Add presidential visits to database matching countries with country codes
 
     Inputs:
         - conn (sqlite3.Connection) connection to database
@@ -202,38 +230,68 @@ def add_presidential_visits(conn):
                                           "year_aggregate"])
 
     scraped_countries = set(president_visits['destination country'].values)
-    cow_countries = set(pd.read_csv(
-        f'{DATA_FOLDER}/{COW_COUNTRY_CODES_FNAME}')['StateNme'].values)
 
-    countries_to_codes_dict = {scraped_country:
-                                   COUNTRY_CODES_DICT[scraped_country]
-                               for cow_country in cow_countries
-                               for scraped_country in scraped_countries
-                               if jellyfish.jaro_winkler_similarity(
-            scraped_country, cow_country) == 1
-                               }
-    corrected_mismatches_dict = {'Bosnia-Herzegovina': 'Bosnia and Herzegovina',
-                                 'Brunei Darussalam': 'Brunei',
-                                 'China, People’s Republic of': 'China',
-                                 'Burma': 'Myanmar',
-                                 'Germany, Federal Republic of': 'Germany',
-                                 'Korea, Republic of': 'Korea',
-                                 'Korea, South': 'South Korea',
-                                 'Macedonia, Former Yugoslav Republic of': 'Macedonia',
-                                 'Republic of China': 'Taiwan',
-                                 'Serbia-Montenegro (Kosovo)': 'Kosovo',
-                                 'U.S.S.R.': 'Russia',
-                                 'Vatican City': 'Papal States',
-                                 'Yugoslavia (Kosovo)': 'Kosovo'
-                                 }
-    for k in corrected_mismatches_dict:
-        countries_to_codes_dict[k] \
-            = COUNTRY_CODES_DICT[corrected_mismatches_dict[k]]
+    known_corrected_mismatches = {
+        'Bosnia-Herzegovina': 'Bosnia and Herzegovina',
+        'Brunei Darussalam': 'Brunei',
+        'China, People’s Republic of': 'China',
+        'Burma': 'Myanmar',
+        'Germany, Federal Republic of': 'Germany',
+        'Korea, Republic of': 'Korea',
+        'Korea, South': 'South Korea',
+        'Macedonia, Former Yugoslav Republic of': 'Macedonia',
+        'Republic of China': 'Taiwan',
+        'Serbia-Montenegro (Kosovo)': 'Kosovo',
+        'U.S.S.R.': 'Russia',
+        'Vatican City': 'Papal States',
+        'Yugoslavia (Kosovo)': 'Kosovo'
+    }
+
+    countries_to_codes_dict = match_countries(scraped_countries,
+                                              known_corrected_mismatches)
 
     president_visits['ccode'] = president_visits['destination country'].replace(
         countries_to_codes_dict)
 
     dump_dataframe_to_db(conn, president_visits, "president_visits")
+
+
+def add_economic_data(conn):
+    """
+    Add economic data on database matching countries with country codes.
+
+    Inputs:
+        - conn (sqlite3.Connection) database connection
+
+    Returns: None
+    """
+    economic_data = pd.read_csv(f"{DATA_FOLDER}{ECONOMIC_DATA_FNAME}")
+
+    economic_data_countries = set(economic_data['country'].values)
+
+    known_corrected_mismatches = {'Antigua and Barbuda': 'Antigua & Barbuda',
+                            'Bolivia (Plurinational State of)': 'Bolivia',
+                            'Brunei Darussalam': 'Brunei',
+                            'D.R. of the Congo': 'Democratic Republic of the Congo',
+                            'Eswatini': 'Swaziland',
+                            'Iran (Islamic Republic of)': 'Iran',
+                            "Lao People's DR": 'Laos',
+                            'North Macedonia': 'Macedonia',
+                            'Republic of Korea': 'Korea',
+                            'Republic of Moldova': 'Moldova',
+                            'Russian Federation': 'Russia',
+                            'Syrian Arab Republic': 'Syria',
+                            'U.R. of Tanzania: Mainland': 'Tanzania',
+                            'United States': 'United States of America',
+                            'Venezuela (Bolivarian Republic of)': 'Venezuela',
+                            'Viet Nam': 'Vietnam'}
+
+    countries_to_codes_dict = match_countries(economic_data_countries,
+                                              known_corrected_mismatches)
+    economic_data['ccode'] = economic_data['country'].replace(
+        countries_to_codes_dict)
+
+    dump_dataframe_to_db(conn, economic_data, 'economic_data')
 
 
 def populate_db(to_csv=True):
@@ -254,8 +312,7 @@ def populate_db(to_csv=True):
 
     add_presidential_visits(conn)
 
-    economic_data = pd.read_csv(f"{DATA_FOLDER}{ECONOMIC_DATA_FNAME}")
-    dump_dataframe_to_db(conn, economic_data, 'economic_data')
+    add_economic_data(conn)
 
     conn.close()
 
@@ -298,4 +355,5 @@ def drop_all_tables():
 
 
 if __name__ == "__main__":
+    # drop_all_tables()
     populate_db()
