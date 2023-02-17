@@ -1,5 +1,7 @@
 import csv
 import sys
+
+import jellyfish
 import networkx as nx
 import pandas as pd
 import numpy as np
@@ -15,6 +17,13 @@ DATA_FOLDER = './data/'
 DIPLOMATIC_DATA_FNAME = 'Diplomatic_Exchange_2006v1.csv'
 DATABASE_NAME = "diplomatic.db"
 TABLE_NAME = "diplomatic_exchanges"
+PRESIDENT_VISITS_FNAME = "AmericanPresidentVisit.csv"
+COW_COUNTRY_CODES_FNAME = "COW-country-codes.csv"
+ECONOMIC_DATA_FNAME = "PennWorldTable.csv"
+
+with open(f"{DATA_FOLDER}{COW_COUNTRY_CODES_FNAME}", 'r') as f:
+    COUNTRY_CODES_DICT = {row['StateNme']: int(row['CCode'])
+                          for row in csv.DictReader(f)}
 
 
 def dump_dataframe_to_db(conn, df, name):
@@ -39,23 +48,24 @@ def dump_dataframe_to_db(conn, df, name):
     else:
         print(f"Table {name} already exists in {DATABASE_NAME} \
         | should have columns {df.columns} and size {df.shape}")
+    cur.close()
 
 
-def country_codes_map():
-    """
-    Map country names to country codes
-
-    Inputs: None
-
-    Returns:
-         (dict) mapping from country names to country codes
-                e.g. {"United States of America": 2}
-    """
-    # country codes to country name mapping
-    with open('', 'r') as f:
-        country_codes_dict = {row['StateNme']: int(row['CCode'])
-                              for row in csv.DictReader(f)}
-    return country_codes_dict
+# def country_codes_map():
+#     """
+#     Map country names to country codes
+#
+#     Inputs: None
+#
+#     Returns:
+#          (dict) mapping from country names to country codes
+#                 e.g. {"United States of America": 2}
+#     """
+#     # country codes to country name mapping
+#     with open(f"{DATA_FOLDER}{COW_COUNTRY_CODES_FNAME}", 'r') as f:
+#         country_codes_dict = {row['StateNme']: int(row['CCode'])
+#                               for row in csv.DictReader(f)}
+#     return country_codes_dict
 
 
 def normalize_dataframe(df):
@@ -176,6 +186,56 @@ def create_all_centrality_measure_tables(conn, diplomatic_exchanges, to_csv):
     drop_tables(conn, centrality_table_names)  # drop intermediary tables
 
 
+def add_presidential_visits(conn):
+    """
+    Add presidential visits to database.
+
+    Inputs:
+        - conn (sqlite3.Connection) connection to database
+
+    Returns: None
+    """
+    president_visits = pd.read_csv(f"{DATA_FOLDER}{PRESIDENT_VISITS_FNAME}",
+                                   names=["destination country",
+                                          "destination city",
+                                          "description", "time", "year",
+                                          "year_aggregate"])
+
+    scraped_countries = set(president_visits['destination country'].values)
+    cow_countries = set(pd.read_csv(
+        f'{DATA_FOLDER}/{COW_COUNTRY_CODES_FNAME}')['StateNme'].values)
+
+    countries_to_codes_dict = {scraped_country:
+                                   COUNTRY_CODES_DICT[scraped_country]
+                               for cow_country in cow_countries
+                               for scraped_country in scraped_countries
+                               if jellyfish.jaro_winkler_similarity(
+            scraped_country, cow_country) == 1
+                               }
+    corrected_mismatches_dict = {'Bosnia-Herzegovina': 'Bosnia and Herzegovina',
+                                 'Brunei Darussalam': 'Brunei',
+                                 'China, People’s Republic of': 'China',
+                                 'Burma': 'Myanmar',
+                                 'Germany, Federal Republic of': 'Germany',
+                                 'Korea, Republic of': 'Korea',
+                                 'Korea, South': 'South Korea',
+                                 'Macedonia, Former Yugoslav Republic of': 'Macedonia',
+                                 'Republic of China': 'Taiwan',
+                                 'Serbia-Montenegro (Kosovo)': 'Kosovo',
+                                 'U.S.S.R.': 'Russia',
+                                 'Vatican City': 'Papal States',
+                                 'Yugoslavia (Kosovo)': 'Kosovo'
+                                 }
+    for k in corrected_mismatches_dict:
+        countries_to_codes_dict[k] \
+            = COUNTRY_CODES_DICT[corrected_mismatches_dict[k]]
+
+    president_visits['ccode'] = president_visits['destination country'].replace(
+        countries_to_codes_dict)
+
+    dump_dataframe_to_db(conn, president_visits, "president_visits")
+
+
 def populate_db(to_csv=True):
     """
     Populate database with diplomatic exchange data.
@@ -191,6 +251,13 @@ def populate_db(to_csv=True):
     dump_dataframe_to_db(conn, diplomatic_exchanges, name=TABLE_NAME)
 
     create_all_centrality_measure_tables(conn, diplomatic_exchanges, to_csv)
+
+    add_presidential_visits(conn)
+
+    economic_data = pd.read_csv(f"{DATA_FOLDER}{ECONOMIC_DATA_FNAME}")
+    dump_dataframe_to_db(conn, economic_data, 'economic_data')
+
+    conn.close()
 
 
 def drop_tables(conn, table_names):
@@ -226,7 +293,9 @@ def drop_all_tables():
     for table in table_names:
         q = f"DROP TABLE {table}"
         cur.execute(q)
+    cur.close()
+    conn.close()
+
 
 if __name__ == "__main__":
-    drop_all_tables()
     populate_db()
