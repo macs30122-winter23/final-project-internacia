@@ -381,7 +381,7 @@ def set_foreign_keys(conn):
         csh_x REAL,  csh_m REAL, csh_r REAL, pl_c REAL, pl_i REAL, 
         pl_g REAL, pl_x REAL, pl_m REAL, pl_n REAL, pl_k REAL, ccode TEXT,
         FOREIGN KEY(ccode) REFERENCES president_visits("ccode")
-        )
+        );
 
         INSERT INTO economic_data_new SELECT * FROM economic_data ;
         DROP TABLE economic_data;
@@ -456,5 +456,5 @@ def drop_all_tables():
 
 
 if __name__ == "__main__":
-    # drop_all_tables()
+    drop_all_tables()
     populate_db()
