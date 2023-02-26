@@ -477,6 +477,23 @@ def get_data_for_regression(conn, year):
     data = pd.read_sql(q, conn)
     return data
 
+def get_data_for_ols(conn, year):
+    q = f"""
+    select * from all_centralities ac
+    left join (select count(*),year_aggregate,ccode from president_visits 
+                                                where year_aggregate={year}
+                                                group by ccode) as pv
+    on ac.node_id == pv.ccode and ac.year == pv.year_aggregate
+    left join economic_data ed
+    on ed.ccode == ac.node_id and ed.year=ac.year
+    left join power_data
+    on power_data.ccode == ac.node_id and power_data."year" == ac."year"
+    where ac.year= {year}
+    """
+    data = pd.read_sql(q, conn)
+    return data
+
+
 if __name__ == "__main__":
     drop_all_tables()
     populate_db()
