@@ -90,7 +90,8 @@ def compute_centrality_measures(G_per_year, year):
     page_rank_scores_dict = nx.pagerank(G_per_year, weight='DR_at_2')
     betweenness_dict = nx.betweenness_centrality(G_per_year,
                                                  weight='DR_at_2')
-    closeness_dict = nx.closeness_centrality(G_per_year)
+    closeness_dict = nx.closeness_centrality(G_per_year.to_undirected(),
+                                             distance='DR_at_2')
     degree_dict = nx.degree(G_per_year, weight='DR_at_2')
     in_degree_dict = nx.in_degree_centrality(G_per_year)
     out_degree_dict = nx.out_degree_centrality(G_per_year)
@@ -200,7 +201,8 @@ def create_all_centrality_measure_tables(conn, diplomatic_exchanges, to_csv):
             continue
         centrality_table_name = f"centrality_{year}"
         centrality_table_names.append(centrality_table_name)
-        add_centrality_measures_to_db_for_year(conn, year, centrality_table_name, to_csv)
+        add_centrality_measures_to_db_for_year(conn, year,
+                                               centrality_table_name, to_csv)
 
     q = " UNION ".join([f"SELECT * FROM {table}"
                         for table in centrality_table_names])
@@ -454,6 +456,20 @@ def drop_all_tables():
     cur.close()
     conn.close()
 
+
+def get_data_for_regression(conn, year):
+    q = f"""
+        -- connect president visits with centralities and econ measures
+        select * from all_centralities ac 
+        left join president_visits pv 
+        on ac.node_id == pv.ccode and ac.year == pv.year_aggregate 
+        left join economic_data ed
+        on ed.ccode == ac.node_id and ed.year=ac.year
+        where ac."year" == {year} 
+        GROUP by ac.node_id;
+    """
+    data = pd.read_sql(q, conn)
+    return data
 
 if __name__ == "__main__":
     drop_all_tables()
