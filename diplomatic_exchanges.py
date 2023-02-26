@@ -20,6 +20,7 @@ TABLE_NAME = "diplomatic_exchanges"
 PRESIDENT_VISITS_FNAME = "AmericanPresidentVisit.csv"
 COW_COUNTRY_CODES_FNAME = "COW-country-codes.csv"
 ECONOMIC_DATA_FNAME = "PennWorldTable.csv"
+POWER_DATA_FNMAE = "NMC-60-abridged.csv"
 
 with open(f"{DATA_FOLDER}{COW_COUNTRY_CODES_FNAME}", 'r') as f:
     COUNTRIES_TO_CODES_DICT = {row['StateNme']: int(row['CCode'])
@@ -408,6 +409,9 @@ def populate_db(to_csv=True):
     diplomatic_exchanges = pd.read_csv(f"{DATA_FOLDER}{DIPLOMATIC_DATA_FNAME}")
     dump_dataframe_to_db(conn, diplomatic_exchanges, name=TABLE_NAME)
 
+    power_data = pd.read_csv(f"{DATA_FOLDER}{POWER_DATA_FNMAE}")
+    dump_dataframe_to_db(conn, power_data, 'power_data')
+
     create_all_centrality_measure_tables(conn, diplomatic_exchanges, to_csv)
 
     add_presidential_visits(conn)
@@ -465,6 +469,8 @@ def get_data_for_regression(conn, year):
         on ac.node_id == pv.ccode and ac.year == pv.year_aggregate 
         left join economic_data ed
         on ed.ccode == ac.node_id and ed.year=ac.year
+        left join power_data 
+        on power_data.ccode == ac.node_id and power_data."year" == ac."year" 
         where ac."year" == {year} 
         GROUP by ac.node_id;
     """
