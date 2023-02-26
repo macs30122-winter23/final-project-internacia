@@ -22,8 +22,10 @@ COW_COUNTRY_CODES_FNAME = "COW-country-codes.csv"
 ECONOMIC_DATA_FNAME = "PennWorldTable.csv"
 
 with open(f"{DATA_FOLDER}{COW_COUNTRY_CODES_FNAME}", 'r') as f:
-    COUNTRY_CODES_DICT = {row['StateNme']: int(row['CCode'])
-                          for row in csv.DictReader(f)}
+    COUNTRIES_TO_CODES_DICT = {row['StateNme']: int(row['CCode'])
+                               for row in csv.DictReader(f)}
+    CODES_TO_COUNTRIES_DICT = {val: k
+                               for k, val in COUNTRIES_TO_CODES_DICT.items()}
 
 
 def dump_dataframe_to_db(conn, df, name):
@@ -84,36 +86,7 @@ def normalize_dataframe(df):
     return pd.DataFrame(scaler.transform(df.values), columns=columns)
 
 
-def compute_centrality_measures(conn, year, centrality_table_name, to_csv):
-    """
-    Compute centrality measures for a given year.
-
-    example query for year 2005:
-        SELECT *  FROM diplomatic_exchanges de
-        WHERE DE=1 AND DR_at_1=3 AND year=2005 AND DR_at_2 != 9
-
-    Inputs:
-        - conn (sqlite3.Connection) connection to database
-        - year (int) year to compute centralities
-        - centrality_table_name (str) name to store the table in the database
-        - to_csv (bool) also dump tables to csv files on disk
-
-    Returns: None
-    """
-
-    q = f""" SELECT *  FROM {TABLE_NAME} de 
-             WHERE DE=1 AND DR_at_1 = 3 AND year ={year} AND DR_at_2 != 9
-         """
-
-    diplomatic_exchanges_per_year = pd.read_sql(q, conn)
-
-    G_per_year = nx.from_pandas_edgelist(
-        diplomatic_exchanges_per_year[['ccode1', 'ccode2', 'DR_at_2']],
-        source='ccode1', target='ccode2',
-        edge_attr='DR_at_2',
-        create_using=nx.DiGraph)
-
-    # compute centrality measures
+def compute_centrality_measures(G_per_year, year):
     page_rank_scores_dict = nx.pagerank(G_per_year, weight='DR_at_2')
     betweenness_dict = nx.betweenness_centrality(G_per_year,
                                                  weight='DR_at_2')
@@ -139,6 +112,30 @@ def compute_centrality_measures(conn, year, centrality_table_name, to_csv):
     df_centralities = normalize_dataframe(df_centralities)
     df_centralities['node_id'] = list(nodes)
     df_centralities['year'] = [year] * len(nodes)
+    return df_centralities
+
+
+def add_centrality_measures_to_db_for_year(conn, year, centrality_table_name,
+                                           to_csv):
+    """
+    Compute centrality measures for a given year.
+
+    example query for year 2005:
+        SELECT *  FROM diplomatic_exchanges de
+        WHERE DE=1 AND DR_at_1=3 AND year=2005 AND DR_at_2 != 9
+
+    Inputs:
+        - conn (sqlite3.Connection) connection to database
+        - year (int) year to compute centralities
+        - centrality_table_name (str) name to store the table in the database
+        - to_csv (bool) also dump tables to csv files on disk
+
+    Returns: None
+    """
+
+    G_per_year = get_diplomatic_graph(conn, year)
+
+    df_centralities = compute_centrality_measures(G_per_year, year)
 
     if to_csv:
         if not os.path.exists('./data/centrality_measures'):
@@ -147,6 +144,37 @@ def compute_centrality_measures(conn, year, centrality_table_name, to_csv):
             f'./data/centrality_measures/centrality_{year}.csv')
 
     dump_dataframe_to_db(conn, df_centralities, name=centrality_table_name)
+
+
+def get_centrality_measures(year):
+    """
+    Once in db get for a year
+    """
+    conn = sqlite3.connect(DATABASE_NAME)
+    q = f'SELECT * FROM all_centralities ac WHERE ac."year"={year};'
+    cur = conn.cursor()
+    df = pd.read_sql(q, conn)
+    cur.close()
+    conn.close()
+    return df
+
+
+def get_diplomatic_graph(conn, year):
+    """
+    Once in db get a graph object
+    """
+    q = f""" SELECT *  FROM {TABLE_NAME} de 
+             WHERE DE=1 AND DR_at_1 = 3 AND year ={year} AND DR_at_2 != 9
+         """
+
+    diplomatic_exchanges_per_year = pd.read_sql(q, conn)
+
+    G_per_year = nx.from_pandas_edgelist(
+        diplomatic_exchanges_per_year[['ccode1', 'ccode2', 'DR_at_2']],
+        source='ccode1', target='ccode2',
+        edge_attr='DR_at_2',
+        create_using=nx.DiGraph)
+    return G_per_year
 
 
 def create_all_centrality_measure_tables(conn, diplomatic_exchanges, to_csv):
@@ -172,7 +200,7 @@ def create_all_centrality_measure_tables(conn, diplomatic_exchanges, to_csv):
             continue
         centrality_table_name = f"centrality_{year}"
         centrality_table_names.append(centrality_table_name)
-        compute_centrality_measures(conn, year, centrality_table_name, to_csv)
+        add_centrality_measures_to_db_for_year(conn, year, centrality_table_name, to_csv)
 
     q = " UNION ".join([f"SELECT * FROM {table}"
                         for table in centrality_table_names])
@@ -198,9 +226,9 @@ def match_countries(target_countries, known_mismatches_corrected):
     Returns
         (dict) mapping from countries to coutnry codes
     """
-    known_countries = set(COUNTRY_CODES_DICT.keys())
+    known_countries = set(COUNTRIES_TO_CODES_DICT.keys())
     countries_to_codes_dict = {target_country:
-                                   COUNTRY_CODES_DICT[target_country]
+                                   COUNTRIES_TO_CODES_DICT[target_country]
                                for known_country in known_countries
                                for target_country in target_countries
                                if jellyfish.jaro_winkler_similarity(
@@ -209,7 +237,7 @@ def match_countries(target_countries, known_mismatches_corrected):
 
     for k in known_mismatches_corrected:
         countries_to_codes_dict[k] \
-            = COUNTRY_CODES_DICT[known_mismatches_corrected[k]]
+            = COUNTRIES_TO_CODES_DICT[known_mismatches_corrected[k]]
 
     return countries_to_codes_dict
 
@@ -270,21 +298,21 @@ def add_economic_data(conn):
     economic_data_countries = set(economic_data['country'].values)
 
     known_corrected_mismatches = {'Antigua and Barbuda': 'Antigua & Barbuda',
-                            'Bolivia (Plurinational State of)': 'Bolivia',
-                            'Brunei Darussalam': 'Brunei',
-                            'D.R. of the Congo': 'Democratic Republic of the Congo',
-                            'Eswatini': 'Swaziland',
-                            'Iran (Islamic Republic of)': 'Iran',
-                            "Lao People's DR": 'Laos',
-                            'North Macedonia': 'Macedonia',
-                            'Republic of Korea': 'Korea',
-                            'Republic of Moldova': 'Moldova',
-                            'Russian Federation': 'Russia',
-                            'Syrian Arab Republic': 'Syria',
-                            'U.R. of Tanzania: Mainland': 'Tanzania',
-                            'United States': 'United States of America',
-                            'Venezuela (Bolivarian Republic of)': 'Venezuela',
-                            'Viet Nam': 'Vietnam'}
+                                  'Bolivia (Plurinational State of)': 'Bolivia',
+                                  'Brunei Darussalam': 'Brunei',
+                                  'D.R. of the Congo': 'Democratic Republic of the Congo',
+                                  'Eswatini': 'Swaziland',
+                                  'Iran (Islamic Republic of)': 'Iran',
+                                  "Lao People's DR": 'Laos',
+                                  'North Macedonia': 'Macedonia',
+                                  'Republic of Korea': 'Korea',
+                                  'Republic of Moldova': 'Moldova',
+                                  'Russian Federation': 'Russia',
+                                  'Syrian Arab Republic': 'Syria',
+                                  'U.R. of Tanzania: Mainland': 'Tanzania',
+                                  'United States': 'United States of America',
+                                  'Venezuela (Bolivarian Republic of)': 'Venezuela',
+                                  'Viet Nam': 'Vietnam'}
 
     countries_to_codes_dict = match_countries(economic_data_countries,
                                               known_corrected_mismatches)
@@ -292,6 +320,76 @@ def add_economic_data(conn):
         countries_to_codes_dict)
 
     dump_dataframe_to_db(conn, economic_data, 'economic_data')
+
+
+def set_foreign_keys(conn):
+    """
+    Set foreign key relationships between tables in db
+    """
+    q = """
+        -- connect centrality measures with diplomatic exchanges (all_centralities -> diplomatic_exchanges)
+        CREATE TABLE all_centralities_new(
+        "index" INTEGER PRIMARY KEY,
+        pagerank REAL,
+        betweenness REAL,
+        closeness REAL,
+        "degree" REAL,
+        in_degree REAL,
+        out_degreee REAL,
+        node_id INTEGER,
+        "year" INTEGER,
+        FOREIGN KEY("year") REFERENCES diplomatic_exchanges ("year"),
+        FOREIGN KEY(node_id) REFERENCES diplomatic_exchanges (ccode1) ON UPDATE CASCADE ON DELETE CASCADE,
+        FOREIGN KEY(node_id) REFERENCES diplomatic_exchanges (ccode2) ON UPDATE CASCADE ON DELETE CASCADE
+        );
+
+        INSERT INTO all_centralities_new SELECT * FROM all_centralities;
+        DROP TABLE all_centralities;
+        ALTER TABLE all_centralities_new RENAME TO all_centralities;
+        SELECT * from all_centralities ac ;
+
+        -- connect president visits with centrality table (president_visits -> all_centralities)
+        create table president_visits_new(
+         "index" INTEGER PRIMARY KEY,
+            "destination country" TEXT,
+            "destination city" TEXT,
+            description TEXT,
+            "time" TEXT, 
+            "year" INTEGER,
+            year_aggregate INTEGER,
+            ccode INTEGER,
+            FOREIGN KEY(year_aggregate) REFERENCES all_centralities("year"),
+            FOREIGN KEY(ccode) REFERENCES all_centralities(node_id) ON UPDATE CASCADE ON DELETE CASCADE
+        );
+
+
+        INSERT INTO president_visits_new SELECT * from president_visits;
+
+        DROP TABLE president_visits;
+        ALTER TABLE president_visits_new RENAME TO president_visits;
+
+        -- connect econ data with president visits (economic_data -> president_visits)
+        CREATE TABLE economic_data_new(
+        "index" INTEGER, countrycode TEXT, country TEXT, currency_unit TEXT, 
+        "year" INTEGER, rgdpe REAL, rgdpo REAL, pop REAL, 
+        emp REAL, avh TEXT, hc REAL, ccon REAL, cda REAL, cgdpe REAL, cgdpo REAL,
+        cn REAL, ck REAL, ctfp REAL, cwtfp REAL, rgdpna REAL, rconna REAL,
+        rdana REAL, rnna REAL, rkna REAL, rtfpna REAL, rwtfpna REAL, labsh REAL,
+        irr REAL, delta REAL, xr REAL, pl_con REAL, pl_da REAL, pl_gdpo REAL,
+        i_cig TEXT, i_xm TEXT, i_xr TEXT, i_outlier TEXT, i_irr TEXT,
+        cor_exp REAL, statcap REAL, csh_c REAL, csh_i REAL, csh_g REAL, 
+        csh_x REAL,  csh_m REAL, csh_r REAL, pl_c REAL, pl_i REAL, 
+        pl_g REAL, pl_x REAL, pl_m REAL, pl_n REAL, pl_k REAL, ccode TEXT,
+        FOREIGN KEY(ccode) REFERENCES president_visits("ccode")
+        )
+
+        INSERT INTO economic_data_new SELECT * FROM economic_data ;
+        DROP TABLE economic_data;
+        ALTER TABLE economic_data_new RENAME TO economic_data;
+        """
+    cur = conn.cursor()
+    cur.executescript(q)
+    cur.close()
 
 
 def populate_db(to_csv=True):
@@ -314,6 +412,9 @@ def populate_db(to_csv=True):
 
     add_economic_data(conn)
 
+    set_foreign_keys(conn)
+
+    conn.commit()
     conn.close()
 
 

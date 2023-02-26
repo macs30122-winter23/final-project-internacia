@@ -59,7 +59,7 @@ def obtain_soup(url):
          (BeatifulSoup) The parsed "soup" obtained by bs4
     """
     request = requests.get(url, headers=
-                {'User-Agent': 'scraper for teaching bitsikokos@uchicago.edu'})
+    {'User-Agent': 'scraper for teaching bitsikokos@uchicago.edu'})
     request = request.text
     soup = BeautifulSoup(request, "html5lib")
     return soup
@@ -120,6 +120,7 @@ def crawl_and_scrape_travels(url_list):
         time.sleep(21)  # time delay of at least 20 sec between scraping
     return out
 
+
 def add_year_columns(csv_filename):
     """
     Adds year columns in the scraped data (csv files) in place.
@@ -135,8 +136,9 @@ def add_year_columns(csv_filename):
                                             int(re.findall(r'\d{4}', x)[0])
                                             )
     dataset["year_aggregate"] = dataset["year"].apply(lambda x:
-                                                      math.ceil(x/5) * 5
+                                                      math.ceil(x / 5) * 5
                                                       )
+
 
 if __name__ == "__main__":
     # Call the travel_visit function to obtain the travel information.
