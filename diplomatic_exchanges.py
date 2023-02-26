@@ -19,7 +19,7 @@ DATABASE_NAME = "diplomatic.db"
 TABLE_NAME = "diplomatic_exchanges"
 PRESIDENT_VISITS_FNAME = "AmericanPresidentVisit.csv"
 COW_COUNTRY_CODES_FNAME = "COW-country-codes.csv"
-ECONOMIC_DATA_FNAME = "PennWorldTable.csv"
+ECONOMIC_DATA_FNAME = "pwt1001.dta"
 POWER_DATA_FNMAE = "NMC-60-abridged.csv"
 
 with open(f"{DATA_FOLDER}{COW_COUNTRY_CODES_FNAME}", 'r') as f:
@@ -296,7 +296,7 @@ def add_economic_data(conn):
 
     Returns: None
     """
-    economic_data = pd.read_csv(f"{DATA_FOLDER}{ECONOMIC_DATA_FNAME}")
+    economic_data = pd.read_stata(f"{DATA_FOLDER}{ECONOMIC_DATA_FNAME}")
 
     economic_data_countries = set(economic_data['country'].values)
 
