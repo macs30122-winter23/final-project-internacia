@@ -1,0 +1,1067 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        
+            <script src="lib/bindings/utils.js"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+                <link href="lib/tom-select/tom-select.css" rel="stylesheet">
+                <script src="lib/tom-select/tom-select.complete.min.js"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 500px;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+             #loadingBar {
+                 position:absolute;
+                 top:0px;
+                 left:0px;
+                 width: 100%;
+                 height: 500px;
+                 background-color:rgba(200,200,200,0.8);
+                 -webkit-transition: all 0.5s ease;
+                 -moz-transition: all 0.5s ease;
+                 -ms-transition: all 0.5s ease;
+                 -o-transition: all 0.5s ease;
+                 transition: all 0.5s ease;
+                 opacity:1;
+             }
+
+             #bar {
+                 position:absolute;
+                 top:0px;
+                 left:0px;
+                 width:20px;
+                 height:20px;
+                 margin:auto auto auto auto;
+                 border-radius:11px;
+                 border:2px solid rgba(30,30,30,0.05);
+                 background: rgb(0, 173, 246); /* Old browsers */
+                 box-shadow: 2px 0px 4px rgba(0,0,0,0.4);
+             }
+
+             #border {
+                 position:absolute;
+                 top:10px;
+                 left:10px;
+                 width:500px;
+                 height:23px;
+                 margin:auto auto auto auto;
+                 box-shadow: 0px 0px 4px rgba(0,0,0,0.2);
+                 border-radius:10px;
+             }
+
+             #text {
+                 position:absolute;
+                 top:8px;
+                 left:530px;
+                 width:30px;
+                 height:50px;
+                 margin:auto auto auto auto;
+                 font-size:22px;
+                 color: #000000;
+             }
+
+             div.outerBorder {
+                 position:relative;
+                 top:400px;
+                 width:600px;
+                 height:44px;
+                 margin:auto auto auto auto;
+                 border:8px solid rgba(0,0,0,0.1);
+                 background: rgb(252,252,252); /* Old browsers */
+                 background: -moz-linear-gradient(top,  rgba(252,252,252,1) 0%, rgba(237,237,237,1) 100%); /* FF3.6+ */
+                 background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(252,252,252,1)), color-stop(100%,rgba(237,237,237,1))); /* Chrome,Safari4+ */
+                 background: -webkit-linear-gradient(top,  rgba(252,252,252,1) 0%,rgba(237,237,237,1) 100%); /* Chrome10+,Safari5.1+ */
+                 background: -o-linear-gradient(top,  rgba(252,252,252,1) 0%,rgba(237,237,237,1) 100%); /* Opera 11.10+ */
+                 background: -ms-linear-gradient(top,  rgba(252,252,252,1) 0%,rgba(237,237,237,1) 100%); /* IE10+ */
+                 background: linear-gradient(to bottom,  rgba(252,252,252,1) 0%,rgba(237,237,237,1) 100%); /* W3C */
+                 filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fcfcfc', endColorstr='#ededed',GradientType=0 ); /* IE6-9 */
+                 border-radius:72px;
+                 box-shadow: 0px 0px 10px rgba(0,0,0,0.2);
+             }
+             
+
+             
+             #config {
+                 float: left;
+                 width: 400px;
+                 height: 600px;
+             }
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+        <div class="card" style="width: 100%">
+            
+                <div id="select-menu" class="card-header">
+                    <div class="row no-gutters">
+                        <div class="col-10 pb-2">
+                            <select
+                            class="form-select"
+                            aria-label="Default select example"
+                            onchange="selectNode([value]);"
+                            id="select-node"
+                            placeholder="Select node..."
+                            >
+                                <option selected>Select a Node by ID</option>
+                                
+                                    <option value="2">2</option>
+                                
+                                    <option value="20">20</option>
+                                
+                                    <option value="31">31</option>
+                                
+                                    <option value="41">41</option>
+                                
+                                    <option value="42">42</option>
+                                
+                                    <option value="51">51</option>
+                                
+                                    <option value="52">52</option>
+                                
+                                    <option value="53">53</option>
+                                
+                                    <option value="54">54</option>
+                                
+                                    <option value="55">55</option>
+                                
+                                    <option value="56">56</option>
+                                
+                                    <option value="57">57</option>
+                                
+                                    <option value="58">58</option>
+                                
+                                    <option value="60">60</option>
+                                
+                                    <option value="70">70</option>
+                                
+                                    <option value="80">80</option>
+                                
+                                    <option value="90">90</option>
+                                
+                                    <option value="91">91</option>
+                                
+                                    <option value="92">92</option>
+                                
+                                    <option value="93">93</option>
+                                
+                                    <option value="94">94</option>
+                                
+                                    <option value="95">95</option>
+                                
+                                    <option value="100">100</option>
+                                
+                                    <option value="101">101</option>
+                                
+                                    <option value="110">110</option>
+                                
+                                    <option value="115">115</option>
+                                
+                                    <option value="135">135</option>
+                                
+                                    <option value="140">140</option>
+                                
+                                    <option value="145">145</option>
+                                
+                                    <option value="150">150</option>
+                                
+                                    <option value="155">155</option>
+                                
+                                    <option value="160">160</option>
+                                
+                                    <option value="165">165</option>
+                                
+                                    <option value="200">200</option>
+                                
+                                    <option value="205">205</option>
+                                
+                                    <option value="210">210</option>
+                                
+                                    <option value="211">211</option>
+                                
+                                    <option value="212">212</option>
+                                
+                                    <option value="220">220</option>
+                                
+                                    <option value="223">223</option>
+                                
+                                    <option value="225">225</option>
+                                
+                                    <option value="230">230</option>
+                                
+                                    <option value="232">232</option>
+                                
+                                    <option value="235">235</option>
+                                
+                                    <option value="255">255</option>
+                                
+                                    <option value="290">290</option>
+                                
+                                    <option value="305">305</option>
+                                
+                                    <option value="310">310</option>
+                                
+                                    <option value="316">316</option>
+                                
+                                    <option value="317">317</option>
+                                
+                                    <option value="325">325</option>
+                                
+                                    <option value="338">338</option>
+                                
+                                    <option value="339">339</option>
+                                
+                                    <option value="343">343</option>
+                                
+                                    <option value="344">344</option>
+                                
+                                    <option value="345">345</option>
+                                
+                                    <option value="346">346</option>
+                                
+                                    <option value="349">349</option>
+                                
+                                    <option value="350">350</option>
+                                
+                                    <option value="352">352</option>
+                                
+                                    <option value="355">355</option>
+                                
+                                    <option value="359">359</option>
+                                
+                                    <option value="360">360</option>
+                                
+                                    <option value="365">365</option>
+                                
+                                    <option value="366">366</option>
+                                
+                                    <option value="367">367</option>
+                                
+                                    <option value="368">368</option>
+                                
+                                    <option value="369">369</option>
+                                
+                                    <option value="370">370</option>
+                                
+                                    <option value="371">371</option>
+                                
+                                    <option value="372">372</option>
+                                
+                                    <option value="373">373</option>
+                                
+                                    <option value="375">375</option>
+                                
+                                    <option value="380">380</option>
+                                
+                                    <option value="385">385</option>
+                                
+                                    <option value="390">390</option>
+                                
+                                    <option value="395">395</option>
+                                
+                                    <option value="402">402</option>
+                                
+                                    <option value="411">411</option>
+                                
+                                    <option value="420">420</option>
+                                
+                                    <option value="432">432</option>
+                                
+                                    <option value="433">433</option>
+                                
+                                    <option value="434">434</option>
+                                
+                                    <option value="435">435</option>
+                                
+                                    <option value="437">437</option>
+                                
+                                    <option value="438">438</option>
+                                
+                                    <option value="439">439</option>
+                                
+                                    <option value="450">450</option>
+                                
+                                    <option value="451">451</option>
+                                
+                                    <option value="452">452</option>
+                                
+                                    <option value="461">461</option>
+                                
+                                    <option value="471">471</option>
+                                
+                                    <option value="475">475</option>
+                                
+                                    <option value="481">481</option>
+                                
+                                    <option value="482">482</option>
+                                
+                                    <option value="483">483</option>
+                                
+                                    <option value="484">484</option>
+                                
+                                    <option value="490">490</option>
+                                
+                                    <option value="500">500</option>
+                                
+                                    <option value="501">501</option>
+                                
+                                    <option value="510">510</option>
+                                
+                                    <option value="516">516</option>
+                                
+                                    <option value="517">517</option>
+                                
+                                    <option value="522">522</option>
+                                
+                                    <option value="530">530</option>
+                                
+                                    <option value="531">531</option>
+                                
+                                    <option value="540">540</option>
+                                
+                                    <option value="541">541</option>
+                                
+                                    <option value="551">551</option>
+                                
+                                    <option value="552">552</option>
+                                
+                                    <option value="553">553</option>
+                                
+                                    <option value="560">560</option>
+                                
+                                    <option value="565">565</option>
+                                
+                                    <option value="570">570</option>
+                                
+                                    <option value="571">571</option>
+                                
+                                    <option value="572">572</option>
+                                
+                                    <option value="580">580</option>
+                                
+                                    <option value="581">581</option>
+                                
+                                    <option value="590">590</option>
+                                
+                                    <option value="591">591</option>
+                                
+                                    <option value="600">600</option>
+                                
+                                    <option value="616">616</option>
+                                
+                                    <option value="625">625</option>
+                                
+                                    <option value="640">640</option>
+                                
+                                    <option value="645">645</option>
+                                
+                                    <option value="651">651</option>
+                                
+                                    <option value="652">652</option>
+                                
+                                    <option value="660">660</option>
+                                
+                                    <option value="663">663</option>
+                                
+                                    <option value="666">666</option>
+                                
+                                    <option value="670">670</option>
+                                
+                                    <option value="679">679</option>
+                                
+                                    <option value="690">690</option>
+                                
+                                    <option value="694">694</option>
+                                
+                                    <option value="696">696</option>
+                                
+                                    <option value="698">698</option>
+                                
+                                    <option value="700">700</option>
+                                
+                                    <option value="701">701</option>
+                                
+                                    <option value="702">702</option>
+                                
+                                    <option value="703">703</option>
+                                
+                                    <option value="704">704</option>
+                                
+                                    <option value="705">705</option>
+                                
+                                    <option value="710">710</option>
+                                
+                                    <option value="712">712</option>
+                                
+                                    <option value="732">732</option>
+                                
+                                    <option value="740">740</option>
+                                
+                                    <option value="750">750</option>
+                                
+                                    <option value="770">770</option>
+                                
+                                    <option value="771">771</option>
+                                
+                                    <option value="780">780</option>
+                                
+                                    <option value="781">781</option>
+                                
+                                    <option value="790">790</option>
+                                
+                                    <option value="800">800</option>
+                                
+                                    <option value="811">811</option>
+                                
+                                    <option value="812">812</option>
+                                
+                                    <option value="816">816</option>
+                                
+                                    <option value="820">820</option>
+                                
+                                    <option value="830">830</option>
+                                
+                                    <option value="835">835</option>
+                                
+                                    <option value="840">840</option>
+                                
+                                    <option value="850">850</option>
+                                
+                                    <option value="860">860</option>
+                                
+                                    <option value="900">900</option>
+                                
+                                    <option value="910">910</option>
+                                
+                                    <option value="920">920</option>
+                                
+                                    <option value="940">940</option>
+                                
+                                    <option value="950">950</option>
+                                
+                                    <option value="955">955</option>
+                                
+                                    <option value="983">983</option>
+                                
+                                    <option value="986">986</option>
+                                
+                                    <option value="987">987</option>
+                                
+                                    <option value="990">990</option>
+                                
+                                    <option value="40">40</option>
+                                
+                                    <option value="130">130</option>
+                                
+                                    <option value="630">630</option>
+                                
+                                    <option value="692">692</option>
+                                
+                                    <option value="731">731</option>
+                                
+                                    <option value="221">221</option>
+                                
+                                    <option value="331">331</option>
+                                
+                                    <option value="404">404</option>
+                                
+                                    <option value="436">436</option>
+                                
+                                    <option value="615">615</option>
+                                
+                                    <option value="620">620</option>
+                                
+                                    <option value="775">775</option>
+                                
+                                    <option value="713">713</option>
+                                
+                                    <option value="403">403</option>
+                                
+                                    <option value="520">520</option>
+                                
+                                    <option value="760">760</option>
+                                
+                                    <option value="935">935</option>
+                                
+                                    <option value="946">946</option>
+                                
+                                    <option value="947">947</option>
+                                
+                                    <option value="970">970</option>
+                                
+                                    <option value="2">2</option>
+                                
+                                    <option value="20">20</option>
+                                
+                                    <option value="31">31</option>
+                                
+                                    <option value="41">41</option>
+                                
+                                    <option value="42">42</option>
+                                
+                                    <option value="51">51</option>
+                                
+                                    <option value="52">52</option>
+                                
+                                    <option value="53">53</option>
+                                
+                                    <option value="54">54</option>
+                                
+                                    <option value="55">55</option>
+                                
+                                    <option value="56">56</option>
+                                
+                                    <option value="57">57</option>
+                                
+                                    <option value="58">58</option>
+                                
+                                    <option value="60">60</option>
+                                
+                                    <option value="70">70</option>
+                                
+                                    <option value="80">80</option>
+                                
+                                    <option value="90">90</option>
+                                
+                                    <option value="91">91</option>
+                                
+                                    <option value="92">92</option>
+                                
+                                    <option value="93">93</option>
+                                
+                                    <option value="94">94</option>
+                                
+                                    <option value="95">95</option>
+                                
+                                    <option value="100">100</option>
+                                
+                                    <option value="101">101</option>
+                                
+                                    <option value="110">110</option>
+                                
+                                    <option value="115">115</option>
+                                
+                                    <option value="135">135</option>
+                                
+                                    <option value="140">140</option>
+                                
+                                    <option value="145">145</option>
+                                
+                                    <option value="150">150</option>
+                                
+                                    <option value="155">155</option>
+                                
+                                    <option value="160">160</option>
+                                
+                                    <option value="165">165</option>
+                                
+                                    <option value="200">200</option>
+                                
+                                    <option value="205">205</option>
+                                
+                                    <option value="210">210</option>
+                                
+                                    <option value="211">211</option>
+                                
+                                    <option value="212">212</option>
+                                
+                                    <option value="220">220</option>
+                                
+                                    <option value="223">223</option>
+                                
+                                    <option value="225">225</option>
+                                
+                                    <option value="230">230</option>
+                                
+                                    <option value="232">232</option>
+                                
+                                    <option value="235">235</option>
+                                
+                                    <option value="255">255</option>
+                                
+                                    <option value="290">290</option>
+                                
+                                    <option value="305">305</option>
+                                
+                                    <option value="310">310</option>
+                                
+                                    <option value="316">316</option>
+                                
+                                    <option value="317">317</option>
+                                
+                                    <option value="325">325</option>
+                                
+                                    <option value="338">338</option>
+                                
+                                    <option value="339">339</option>
+                                
+                                    <option value="343">343</option>
+                                
+                                    <option value="344">344</option>
+                                
+                                    <option value="345">345</option>
+                                
+                                    <option value="346">346</option>
+                                
+                                    <option value="349">349</option>
+                                
+                                    <option value="350">350</option>
+                                
+                                    <option value="352">352</option>
+                                
+                                    <option value="355">355</option>
+                                
+                                    <option value="359">359</option>
+                                
+                                    <option value="360">360</option>
+                                
+                                    <option value="365">365</option>
+                                
+                                    <option value="366">366</option>
+                                
+                                    <option value="367">367</option>
+                                
+                                    <option value="368">368</option>
+                                
+                                    <option value="369">369</option>
+                                
+                                    <option value="370">370</option>
+                                
+                                    <option value="371">371</option>
+                                
+                                    <option value="372">372</option>
+                                
+                                    <option value="373">373</option>
+                                
+                                    <option value="375">375</option>
+                                
+                                    <option value="380">380</option>
+                                
+                                    <option value="385">385</option>
+                                
+                                    <option value="390">390</option>
+                                
+                                    <option value="395">395</option>
+                                
+                                    <option value="402">402</option>
+                                
+                                    <option value="411">411</option>
+                                
+                                    <option value="420">420</option>
+                                
+                                    <option value="432">432</option>
+                                
+                                    <option value="433">433</option>
+                                
+                                    <option value="434">434</option>
+                                
+                                    <option value="435">435</option>
+                                
+                                    <option value="437">437</option>
+                                
+                                    <option value="438">438</option>
+                                
+                                    <option value="439">439</option>
+                                
+                                    <option value="450">450</option>
+                                
+                                    <option value="451">451</option>
+                                
+                                    <option value="452">452</option>
+                                
+                                    <option value="461">461</option>
+                                
+                                    <option value="471">471</option>
+                                
+                                    <option value="475">475</option>
+                                
+                                    <option value="481">481</option>
+                                
+                                    <option value="482">482</option>
+                                
+                                    <option value="483">483</option>
+                                
+                                    <option value="484">484</option>
+                                
+                                    <option value="490">490</option>
+                                
+                                    <option value="500">500</option>
+                                
+                                    <option value="501">501</option>
+                                
+                                    <option value="510">510</option>
+                                
+                                    <option value="516">516</option>
+                                
+                                    <option value="517">517</option>
+                                
+                                    <option value="522">522</option>
+                                
+                                    <option value="530">530</option>
+                                
+                                    <option value="531">531</option>
+                                
+                                    <option value="540">540</option>
+                                
+                                    <option value="541">541</option>
+                                
+                                    <option value="551">551</option>
+                                
+                                    <option value="552">552</option>
+                                
+                                    <option value="553">553</option>
+                                
+                                    <option value="560">560</option>
+                                
+                                    <option value="565">565</option>
+                                
+                                    <option value="570">570</option>
+                                
+                                    <option value="571">571</option>
+                                
+                                    <option value="572">572</option>
+                                
+                                    <option value="580">580</option>
+                                
+                                    <option value="581">581</option>
+                                
+                                    <option value="590">590</option>
+                                
+                                    <option value="591">591</option>
+                                
+                                    <option value="600">600</option>
+                                
+                                    <option value="616">616</option>
+                                
+                                    <option value="625">625</option>
+                                
+                                    <option value="640">640</option>
+                                
+                                    <option value="645">645</option>
+                                
+                                    <option value="651">651</option>
+                                
+                                    <option value="652">652</option>
+                                
+                                    <option value="660">660</option>
+                                
+                                    <option value="663">663</option>
+                                
+                                    <option value="666">666</option>
+                                
+                                    <option value="670">670</option>
+                                
+                                    <option value="679">679</option>
+                                
+                                    <option value="690">690</option>
+                                
+                                    <option value="694">694</option>
+                                
+                                    <option value="696">696</option>
+                                
+                                    <option value="698">698</option>
+                                
+                                    <option value="700">700</option>
+                                
+                                    <option value="701">701</option>
+                                
+                                    <option value="702">702</option>
+                                
+                                    <option value="703">703</option>
+                                
+                                    <option value="704">704</option>
+                                
+                                    <option value="705">705</option>
+                                
+                                    <option value="710">710</option>
+                                
+                                    <option value="712">712</option>
+                                
+                                    <option value="732">732</option>
+                                
+                                    <option value="740">740</option>
+                                
+                                    <option value="750">750</option>
+                                
+                                    <option value="770">770</option>
+                                
+                                    <option value="771">771</option>
+                                
+                                    <option value="780">780</option>
+                                
+                                    <option value="781">781</option>
+                                
+                                    <option value="790">790</option>
+                                
+                                    <option value="800">800</option>
+                                
+                                    <option value="811">811</option>
+                                
+                                    <option value="812">812</option>
+                                
+                                    <option value="816">816</option>
+                                
+                                    <option value="820">820</option>
+                                
+                                    <option value="830">830</option>
+                                
+                                    <option value="835">835</option>
+                                
+                                    <option value="840">840</option>
+                                
+                                    <option value="850">850</option>
+                                
+                                    <option value="860">860</option>
+                                
+                                    <option value="900">900</option>
+                                
+                                    <option value="910">910</option>
+                                
+                                    <option value="920">920</option>
+                                
+                                    <option value="940">940</option>
+                                
+                                    <option value="950">950</option>
+                                
+                                    <option value="955">955</option>
+                                
+                                    <option value="983">983</option>
+                                
+                                    <option value="986">986</option>
+                                
+                                    <option value="987">987</option>
+                                
+                                    <option value="990">990</option>
+                                
+                                    <option value="40">40</option>
+                                
+                                    <option value="130">130</option>
+                                
+                                    <option value="436">436</option>
+                                
+                                    <option value="615">615</option>
+                                
+                                    <option value="630">630</option>
+                                
+                                    <option value="731">731</option>
+                                
+                                    <option value="620">620</option>
+                                
+                                    <option value="713">713</option>
+                                
+                                    <option value="775">775</option>
+                                
+                                    <option value="692">692</option>
+                                
+                                    <option value="221">221</option>
+                                
+                                    <option value="331">331</option>
+                                
+                                    <option value="404">404</option>
+                                
+                                    <option value="403">403</option>
+                                
+                                    <option value="520">520</option>
+                                
+                                    <option value="760">760</option>
+                                
+                                    <option value="935">935</option>
+                                
+                                    <option value="946">946</option>
+                                
+                                    <option value="947">947</option>
+                                
+                                    <option value="970">970</option>
+                                
+                            </select>
+                        </div>
+                        <div class="col-2 pb-2">
+                            <button type="button" class="btn btn-primary btn-block" onclick="neighbourhoodHighlight({nodes: []});">Reset Selection</button>
+                        </div>
+                    </div>
+                </div>
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+            <div id="loadingBar">
+              <div class="outerBorder">
+                <div id="text">0%</div>
+                <div id="border">
+                  <div id="bar"></div>
+                </div>
+              </div>
+            </div>
+        
+        
+            <div id="config"></div>
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+                  new TomSelect("#select-node",{
+                      create: false,
+                      sortField: {
+                          field: "text",
+                          direction: "asc"
+                      }
+                  });
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"color": "#97c2fc", "id": 2, "label": 2, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 20, "label": 20, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 31, "label": 31, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 41, "label": 41, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 42, "label": 42, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 51, "label": 51, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 52, "label": 52, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 53, "label": 53, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 54, "label": 54, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 55, "label": 55, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 56, "label": 56, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 57, "label": 57, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 58, "label": 58, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 60, "label": 60, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 70, "label": 70, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 80, "label": 80, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 90, "label": 90, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 91, "label": 91, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 92, "label": 92, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 93, "label": 93, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 94, "label": 94, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 95, "label": 95, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 100, "label": 100, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 101, "label": 101, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 110, "label": 110, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 115, "label": 115, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 135, "label": 135, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 140, "label": 140, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 145, "label": 145, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 150, "label": 150, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 155, "label": 155, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 160, "label": 160, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 165, "label": 165, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 200, "label": 200, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 205, "label": 205, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 210, "label": 210, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 211, "label": 211, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 212, "label": 212, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 220, "label": 220, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 223, "label": 223, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 225, "label": 225, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 230, "label": 230, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 232, "label": 232, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 235, "label": 235, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 255, "label": 255, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 290, "label": 290, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 305, "label": 305, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 310, "label": 310, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 316, "label": 316, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 317, "label": 317, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 325, "label": 325, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 338, "label": 338, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 339, "label": 339, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 343, "label": 343, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 344, "label": 344, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 345, "label": 345, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 346, "label": 346, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 349, "label": 349, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 350, "label": 350, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 352, "label": 352, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 355, "label": 355, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 359, "label": 359, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 360, "label": 360, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 365, "label": 365, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 366, "label": 366, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 367, "label": 367, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 368, "label": 368, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 369, "label": 369, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 370, "label": 370, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 371, "label": 371, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 372, "label": 372, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 373, "label": 373, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 375, "label": 375, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 380, "label": 380, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 385, "label": 385, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 390, "label": 390, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 395, "label": 395, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 402, "label": 402, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 411, "label": 411, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 420, "label": 420, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 432, "label": 432, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 433, "label": 433, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 434, "label": 434, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 435, "label": 435, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 437, "label": 437, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 438, "label": 438, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 439, "label": 439, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 450, "label": 450, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 451, "label": 451, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 452, "label": 452, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 461, "label": 461, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 471, "label": 471, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 475, "label": 475, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 481, "label": 481, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 482, "label": 482, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 483, "label": 483, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 484, "label": 484, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 490, "label": 490, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 500, "label": 500, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 501, "label": 501, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 510, "label": 510, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 516, "label": 516, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 517, "label": 517, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 522, "label": 522, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 530, "label": 530, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 531, "label": 531, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 540, "label": 540, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 541, "label": 541, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 551, "label": 551, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 552, "label": 552, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 553, "label": 553, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 560, "label": 560, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 565, "label": 565, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 570, "label": 570, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 571, "label": 571, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 572, "label": 572, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 580, "label": 580, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 581, "label": 581, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 590, "label": 590, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 591, "label": 591, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 600, "label": 600, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 616, "label": 616, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 625, "label": 625, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 640, "label": 640, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 645, "label": 645, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 651, "label": 651, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 652, "label": 652, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 660, "label": 660, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 663, "label": 663, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 666, "label": 666, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 670, "label": 670, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 679, "label": 679, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 690, "label": 690, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 694, "label": 694, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 696, "label": 696, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 698, "label": 698, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 700, "label": 700, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 701, "label": 701, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 702, "label": 702, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 703, "label": 703, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 704, "label": 704, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 705, "label": 705, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 710, "label": 710, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 712, "label": 712, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 732, "label": 732, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 740, "label": 740, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 750, "label": 750, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 770, "label": 770, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 771, "label": 771, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 780, "label": 780, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 781, "label": 781, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 790, "label": 790, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 800, "label": 800, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 811, "label": 811, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 812, "label": 812, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 816, "label": 816, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 820, "label": 820, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 830, "label": 830, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 835, "label": 835, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 840, "label": 840, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 850, "label": 850, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 860, "label": 860, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 900, "label": 900, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 910, "label": 910, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 920, "label": 920, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 940, "label": 940, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 950, "label": 950, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 955, "label": 955, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 983, "label": 983, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 986, "label": 986, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 987, "label": 987, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 990, "label": 990, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 40, "label": 40, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 130, "label": 130, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 630, "label": 630, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 692, "label": 692, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 731, "label": 731, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 221, "label": 221, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 331, "label": 331, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 404, "label": 404, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 436, "label": 436, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 615, "label": 615, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 620, "label": 620, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 775, "label": 775, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 713, "label": 713, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 403, "label": 403, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 520, "label": 520, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 760, "label": 760, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 935, "label": 935, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 946, "label": 946, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 947, "label": 947, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": 970, "label": 970, "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "2", "label": "USA", "shape": "dot"}, {"color": "#97c2fc", "id": "20", "label": "Canada", "shape": "dot"}, {"color": "#97c2fc", "id": "31", "label": "Bahamas", "shape": "dot"}, {"color": "#97c2fc", "id": "41", "label": "Haiti", "shape": "dot"}, {"color": "#97c2fc", "id": "42", "label": "Dominican Republic", "shape": "dot"}, {"color": "#97c2fc", "id": "51", "label": "Jamaica", "shape": "dot"}, {"color": "#97c2fc", "id": "52", "label": "Trinidad and Tobago", "shape": "dot"}, {"color": "#97c2fc", "id": "53", "label": "Barbados", "shape": "dot"}, {"color": "#97c2fc", "id": "54", "label": "Dominica", "shape": "dot"}, {"color": "#97c2fc", "id": "55", "label": "Grenada", "shape": "dot"}, {"color": "#97c2fc", "id": "56", "label": "St. Lucia", "shape": "dot"}, {"color": "#97c2fc", "id": "57", "label": "St. Vincent and the Grenadines", "shape": "dot"}, {"color": "#97c2fc", "id": "58", "label": "Antigua \u0026 Barbuda", "shape": "dot"}, {"color": "#97c2fc", "id": "60", "label": "St. Kitts and Nevis", "shape": "dot"}, {"color": "#97c2fc", "id": "70", "label": "Mexico", "shape": "dot"}, {"color": "#97c2fc", "id": "80", "label": "Belize", "shape": "dot"}, {"color": "#97c2fc", "id": "90", "label": "Guatemala", "shape": "dot"}, {"color": "#97c2fc", "id": "91", "label": "Honduras", "shape": "dot"}, {"color": "#97c2fc", "id": "92", "label": "El Salvador", "shape": "dot"}, {"color": "#97c2fc", "id": "93", "label": "Nicaragua", "shape": "dot"}, {"color": "#97c2fc", "id": "94", "label": "Costa Rica", "shape": "dot"}, {"color": "#97c2fc", "id": "95", "label": "Panama", "shape": "dot"}, {"color": "#97c2fc", "id": "100", "label": "Colombia", "shape": "dot"}, {"color": "#97c2fc", "id": "101", "label": "Venezuela", "shape": "dot"}, {"color": "#97c2fc", "id": "110", "label": "Guyana", "shape": "dot"}, {"color": "#97c2fc", "id": "115", "label": "Suriname", "shape": "dot"}, {"color": "#97c2fc", "id": "135", "label": "Peru", "shape": "dot"}, {"color": "#97c2fc", "id": "140", "label": "Brazil", "shape": "dot"}, {"color": "#97c2fc", "id": "145", "label": "Bolivia", "shape": "dot"}, {"color": "#97c2fc", "id": "150", "label": "Paraguay", "shape": "dot"}, {"color": "#97c2fc", "id": "155", "label": "Chile", "shape": "dot"}, {"color": "#97c2fc", "id": "160", "label": "Argentina", "shape": "dot"}, {"color": "#97c2fc", "id": "165", "label": "Uruguay", "shape": "dot"}, {"color": "#97c2fc", "id": "200", "label": "UK", "shape": "dot"}, {"color": "#97c2fc", "id": "205", "label": "Ireland", "shape": "dot"}, {"color": "#97c2fc", "id": "210", "label": "Netherlands", "shape": "dot"}, {"color": "#97c2fc", "id": "211", "label": "Belgium", "shape": "dot"}, {"color": "#97c2fc", "id": "212", "label": "Luxembourg", "shape": "dot"}, {"color": "#97c2fc", "id": "220", "label": "France", "shape": "dot"}, {"color": "#97c2fc", "id": "223", "label": "Liechtenstein", "shape": "dot"}, {"color": "#97c2fc", "id": "225", "label": "Switzerland", "shape": "dot"}, {"color": "#97c2fc", "id": "230", "label": "Spain", "shape": "dot"}, {"color": "#97c2fc", "id": "232", "label": "Andorra", "shape": "dot"}, {"color": "#97c2fc", "id": "235", "label": "Portugal", "shape": "dot"}, {"color": "#97c2fc", "id": "255", "label": "Germany", "shape": "dot"}, {"color": "#97c2fc", "id": "290", "label": "Poland", "shape": "dot"}, {"color": "#97c2fc", "id": "305", "label": "Austria", "shape": "dot"}, {"color": "#97c2fc", "id": "310", "label": "Hungary", "shape": "dot"}, {"color": "#97c2fc", "id": "316", "label": "Czech Republic", "shape": "dot"}, {"color": "#97c2fc", "id": "317", "label": "Slovakia", "shape": "dot"}, {"color": "#97c2fc", "id": "325", "label": "Italy", "shape": "dot"}, {"color": "#97c2fc", "id": "338", "label": "Malta", "shape": "dot"}, {"color": "#97c2fc", "id": "339", "label": "Albania", "shape": "dot"}, {"color": "#97c2fc", "id": "343", "label": "Macedonia", "shape": "dot"}, {"color": "#97c2fc", "id": "344", "label": "Croatia", "shape": "dot"}, {"color": "#97c2fc", "id": "345", "label": "Yugoslavia", "shape": "dot"}, {"color": "#97c2fc", "id": "346", "label": "Bosnia and Herzegovina", "shape": "dot"}, {"color": "#97c2fc", "id": "349", "label": "Slovenia", "shape": "dot"}, {"color": "#97c2fc", "id": "350", "label": "Greece", "shape": "dot"}, {"color": "#97c2fc", "id": "352", "label": "Cyprus", "shape": "dot"}, {"color": "#97c2fc", "id": "355", "label": "Bulgaria", "shape": "dot"}, {"color": "#97c2fc", "id": "359", "label": "Moldova", "shape": "dot"}, {"color": "#97c2fc", "id": "360", "label": "Romania", "shape": "dot"}, {"color": "#97c2fc", "id": "365", "label": "Russia", "shape": "dot"}, {"color": "#97c2fc", "id": "366", "label": "Estonia", "shape": "dot"}, {"color": "#97c2fc", "id": "367", "label": "Latvia", "shape": "dot"}, {"color": "#97c2fc", "id": "368", "label": "Lithuania", "shape": "dot"}, {"color": "#97c2fc", "id": "369", "label": "Ukraine", "shape": "dot"}, {"color": "#97c2fc", "id": "370", "label": "Belarus", "shape": "dot"}, {"color": "#97c2fc", "id": "371", "label": "Armenia", "shape": "dot"}, {"color": "#97c2fc", "id": "372", "label": "Georgia", "shape": "dot"}, {"color": "#97c2fc", "id": "373", "label": "Azerbaijan", "shape": "dot"}, {"color": "#97c2fc", "id": "375", "label": "Finland", "shape": "dot"}, {"color": "#97c2fc", "id": "380", "label": "Sweden", "shape": "dot"}, {"color": "#97c2fc", "id": "385", "label": "Norway", "shape": "dot"}, {"color": "#97c2fc", "id": "390", "label": "Denmark", "shape": "dot"}, {"color": "#97c2fc", "id": "395", "label": "Iceland", "shape": "dot"}, {"color": "#97c2fc", "id": "402", "label": "Cape Verde", "shape": "dot"}, {"color": "#97c2fc", "id": "411", "label": "Equatorial Guinea", "shape": "dot"}, {"color": "#97c2fc", "id": "420", "label": "Gambia", "shape": "dot"}, {"color": "#97c2fc", "id": "432", "label": "Mali", "shape": "dot"}, {"color": "#97c2fc", "id": "433", "label": "Senegal", "shape": "dot"}, {"color": "#97c2fc", "id": "434", "label": "Benin", "shape": "dot"}, {"color": "#97c2fc", "id": "435", "label": "Mauritania", "shape": "dot"}, {"color": "#97c2fc", "id": "437", "label": "Ivory Coast", "shape": "dot"}, {"color": "#97c2fc", "id": "438", "label": "Guinea", "shape": "dot"}, {"color": "#97c2fc", "id": "439", "label": "Burkina Faso", "shape": "dot"}, {"color": "#97c2fc", "id": "450", "label": "Liberia", "shape": "dot"}, {"color": "#97c2fc", "id": "451", "label": "Sierra Leone", "shape": "dot"}, {"color": "#97c2fc", "id": "452", "label": "Ghana", "shape": "dot"}, {"color": "#97c2fc", "id": "461", "label": "Togo", "shape": "dot"}, {"color": "#97c2fc", "id": "471", "label": "Cameroon", "shape": "dot"}, {"color": "#97c2fc", "id": "475", "label": "Nigeria", "shape": "dot"}, {"color": "#97c2fc", "id": "481", "label": "Gabon", "shape": "dot"}, {"color": "#97c2fc", "id": "482", "label": "Central African Republic", "shape": "dot"}, {"color": "#97c2fc", "id": "483", "label": "Chad", "shape": "dot"}, {"color": "#97c2fc", "id": "484", "label": "Congo", "shape": "dot"}, {"color": "#97c2fc", "id": "490", "label": "Congo", "shape": "dot"}, {"color": "#97c2fc", "id": "500", "label": "Uganda", "shape": "dot"}, {"color": "#97c2fc", "id": "501", "label": "Kenya", "shape": "dot"}, {"color": "#97c2fc", "id": "510", "label": "Tanzania", "shape": "dot"}, {"color": "#97c2fc", "id": "516", "label": "Burundi", "shape": "dot"}, {"color": "#97c2fc", "id": "517", "label": "Rwanda", "shape": "dot"}, {"color": "#97c2fc", "id": "522", "label": "Djibouti", "shape": "dot"}, {"color": "#97c2fc", "id": "530", "label": "Ethiopia", "shape": "dot"}, {"color": "#97c2fc", "id": "531", "label": "Eritrea", "shape": "dot"}, {"color": "#97c2fc", "id": "540", "label": "Angola", "shape": "dot"}, {"color": "#97c2fc", "id": "541", "label": "Mozambique", "shape": "dot"}, {"color": "#97c2fc", "id": "551", "label": "Zambia", "shape": "dot"}, {"color": "#97c2fc", "id": "552", "label": "Zimbabwe", "shape": "dot"}, {"color": "#97c2fc", "id": "553", "label": "Malawi", "shape": "dot"}, {"color": "#97c2fc", "id": "560", "label": "South Africa", "shape": "dot"}, {"color": "#97c2fc", "id": "565", "label": "Namibia", "shape": "dot"}, {"color": "#97c2fc", "id": "570", "label": "Lesotho", "shape": "dot"}, {"color": "#97c2fc", "id": "571", "label": "Botswana", "shape": "dot"}, {"color": "#97c2fc", "id": "572", "label": "Swaziland", "shape": "dot"}, {"color": "#97c2fc", "id": "580", "label": "Madagascar", "shape": "dot"}, {"color": "#97c2fc", "id": "581", "label": "Comoros", "shape": "dot"}, {"color": "#97c2fc", "id": "590", "label": "Mauritius", "shape": "dot"}, {"color": "#97c2fc", "id": "591", "label": "Seychelles", "shape": "dot"}, {"color": "#97c2fc", "id": "600", "label": "Morocco", "shape": "dot"}, {"color": "#97c2fc", "id": "616", "label": "Tunisia", "shape": "dot"}, {"color": "#97c2fc", "id": "625", "label": "Sudan", "shape": "dot"}, {"color": "#97c2fc", "id": "640", "label": "Turkey", "shape": "dot"}, {"color": "#97c2fc", "id": "645", "label": "Iraq", "shape": "dot"}, {"color": "#97c2fc", "id": "651", "label": "Egypt", "shape": "dot"}, {"color": "#97c2fc", "id": "652", "label": "Syria", "shape": "dot"}, {"color": "#97c2fc", "id": "660", "label": "Lebanon", "shape": "dot"}, {"color": "#97c2fc", "id": "663", "label": "Jordan", "shape": "dot"}, {"color": "#97c2fc", "id": "666", "label": "Israel", "shape": "dot"}, {"color": "#97c2fc", "id": "670", "label": "Saudi Arabia", "shape": "dot"}, {"color": "#97c2fc", "id": "679", "label": "Yemen", "shape": "dot"}, {"color": "#97c2fc", "id": "690", "label": "Kuwait", "shape": "dot"}, {"color": "#97c2fc", "id": "694", "label": "Qatar", "shape": "dot"}, {"color": "#97c2fc", "id": "696", "label": "United Arab Emirates", "shape": "dot"}, {"color": "#97c2fc", "id": "698", "label": "Oman", "shape": "dot"}, {"color": "#97c2fc", "id": "700", "label": "Afghanistan", "shape": "dot"}, {"color": "#97c2fc", "id": "701", "label": "Turkmenistan", "shape": "dot"}, {"color": "#97c2fc", "id": "702", "label": "Tajikistan", "shape": "dot"}, {"color": "#97c2fc", "id": "703", "label": "Kyrgyzstan", "shape": "dot"}, {"color": "#97c2fc", "id": "704", "label": "Uzbekistan", "shape": "dot"}, {"color": "#97c2fc", "id": "705", "label": "Kazakhstan", "shape": "dot"}, {"color": "#97c2fc", "id": "710", "label": "China", "shape": "dot"}, {"color": "#97c2fc", "id": "712", "label": "Mongolia", "shape": "dot"}, {"color": "#97c2fc", "id": "732", "label": "South Korea", "shape": "dot"}, {"color": "#97c2fc", "id": "740", "label": "Japan", "shape": "dot"}, {"color": "#97c2fc", "id": "750", "label": "India", "shape": "dot"}, {"color": "#97c2fc", "id": "770", "label": "Pakistan", "shape": "dot"}, {"color": "#97c2fc", "id": "771", "label": "Bangladesh", "shape": "dot"}, {"color": "#97c2fc", "id": "780", "label": "Sri Lanka", "shape": "dot"}, {"color": "#97c2fc", "id": "781", "label": "Maldives", "shape": "dot"}, {"color": "#97c2fc", "id": "790", "label": "Nepal", "shape": "dot"}, {"color": "#97c2fc", "id": "800", "label": "Thailand", "shape": "dot"}, {"color": "#97c2fc", "id": "811", "label": "Cambodia", "shape": "dot"}, {"color": "#97c2fc", "id": "812", "label": "Laos", "shape": "dot"}, {"color": "#97c2fc", "id": "816", "label": "Vietnam", "shape": "dot"}, {"color": "#97c2fc", "id": "820", "label": "Malaysia", "shape": "dot"}, {"color": "#97c2fc", "id": "830", "label": "Singapore", "shape": "dot"}, {"color": "#97c2fc", "id": "835", "label": "Brunei", "shape": "dot"}, {"color": "#97c2fc", "id": "840", "label": "Philippines", "shape": "dot"}, {"color": "#97c2fc", "id": "850", "label": "Indonesia", "shape": "dot"}, {"color": "#97c2fc", "id": "860", "label": "East Timor", "shape": "dot"}, {"color": "#97c2fc", "id": "900", "label": "Australia", "shape": "dot"}, {"color": "#97c2fc", "id": "910", "label": "Papua New Guinea", "shape": "dot"}, {"color": "#97c2fc", "id": "920", "label": "New Zealand", "shape": "dot"}, {"color": "#97c2fc", "id": "940", "label": "Solomon Islands", "shape": "dot"}, {"color": "#97c2fc", "id": "950", "label": "Fiji", "shape": "dot"}, {"color": "#97c2fc", "id": "955", "label": "Tonga", "shape": "dot"}, {"color": "#97c2fc", "id": "983", "label": "Marshall Islands", "shape": "dot"}, {"color": "#97c2fc", "id": "986", "label": "Palau", "shape": "dot"}, {"color": "#97c2fc", "id": "987", "label": "Federated States of Micronesia", "shape": "dot"}, {"color": "#97c2fc", "id": "990", "label": "Samoa", "shape": "dot"}, {"color": "#97c2fc", "id": "40", "label": "Cuba", "shape": "dot"}, {"color": "#97c2fc", "id": "130", "label": "Ecuador", "shape": "dot"}, {"color": "#97c2fc", "id": "436", "label": "Niger", "shape": "dot"}, {"color": "#97c2fc", "id": "615", "label": "Algeria", "shape": "dot"}, {"color": "#97c2fc", "id": "630", "label": "Iran", "shape": "dot"}, {"color": "#97c2fc", "id": "731", "label": "North Korea", "shape": "dot"}, {"color": "#97c2fc", "id": "620", "label": "Libya", "shape": "dot"}, {"color": "#97c2fc", "id": "713", "label": "Taiwan", "shape": "dot"}, {"color": "#97c2fc", "id": "775", "label": "Myanmar", "shape": "dot"}, {"color": "#97c2fc", "id": "692", "label": "Bahrain", "shape": "dot"}, {"color": "#97c2fc", "id": "221", "label": "Monaco", "shape": "dot"}, {"color": "#97c2fc", "id": "331", "label": "San Marino", "shape": "dot"}, {"color": "#97c2fc", "id": "404", "label": "Guinea-Bissau", "shape": "dot"}, {"color": "#97c2fc", "id": "403", "label": "Sao Tome and Principe", "shape": "dot"}, {"color": "#97c2fc", "id": "520", "label": "Somalia", "shape": "dot"}, {"color": "#97c2fc", "id": "760", "label": "Bhutan", "shape": "dot"}, {"color": "#97c2fc", "id": "935", "label": "Vanuatu", "shape": "dot"}, {"color": "#97c2fc", "id": "946", "label": "Kiribati", "shape": "dot"}, {"color": "#97c2fc", "id": "947", "label": "Tuvalu", "shape": "dot"}, {"color": "#97c2fc", "id": "970", "label": "Nauru", "shape": "dot"}]);
+                  edges = new vis.DataSet([{"from": 2, "to": 20, "width": 1}, {"from": 2, "to": 31, "width": 1}, {"from": 2, "to": 41, "width": 1}, {"from": 2, "to": 42, "width": 1}, {"from": 2, "to": 51, "width": 1}, {"from": 2, "to": 52, "width": 1}, {"from": 2, "to": 53, "width": 1}, {"from": 2, "to": 54, "width": 1}, {"from": 2, "to": 55, "width": 1}, {"from": 2, "to": 56, "width": 1}, {"from": 2, "to": 57, "width": 1}, {"from": 2, "to": 58, "width": 1}, {"from": 2, "to": 60, "width": 1}, {"from": 2, "to": 70, "width": 1}, {"from": 2, "to": 80, "width": 1}, {"from": 2, "to": 90, "width": 1}, {"from": 2, "to": 91, "width": 1}, {"from": 2, "to": 92, "width": 1}, {"from": 2, "to": 93, "width": 1}, {"from": 2, "to": 94, "width": 1}, {"from": 2, "to": 95, "width": 1}, {"from": 2, "to": 100, "width": 1}, {"from": 2, "to": 101, "width": 1}, {"from": 2, "to": 110, "width": 1}, {"from": 2, "to": 115, "width": 1}, {"from": 2, "to": 135, "width": 1}, {"from": 2, "to": 140, "width": 1}, {"from": 2, "to": 145, "width": 1}, {"from": 2, "to": 150, "width": 1}, {"from": 2, "to": 155, "width": 1}, {"from": 2, "to": 160, "width": 1}, {"from": 2, "to": 165, "width": 1}, {"from": 2, "to": 200, "width": 1}, {"from": 2, "to": 205, "width": 1}, {"from": 2, "to": 210, "width": 1}, {"from": 2, "to": 211, "width": 1}, {"from": 2, "to": 212, "width": 1}, {"from": 2, "to": 220, "width": 1}, {"from": 2, "to": 223, "width": 1}, {"from": 2, "to": 225, "width": 1}, {"from": 2, "to": 230, "width": 1}, {"from": 2, "to": 232, "width": 1}, {"from": 2, "to": 235, "width": 1}, {"from": 2, "to": 255, "width": 1}, {"from": 2, "to": 290, "width": 1}, {"from": 2, "to": 305, "width": 1}, {"from": 2, "to": 310, "width": 1}, {"from": 2, "to": 316, "width": 1}, {"from": 2, "to": 317, "width": 1}, {"from": 2, "to": 325, "width": 1}, {"from": 2, "to": 338, "width": 1}, {"from": 2, "to": 339, "width": 1}, {"from": 2, "to": 343, "width": 1}, {"from": 2, "to": 344, "width": 1}, {"from": 2, "to": 345, "width": 1}, {"from": 2, "to": 346, "width": 1}, {"from": 2, "to": 349, "width": 1}, {"from": 2, "to": 350, "width": 1}, {"from": 2, "to": 352, "width": 1}, {"from": 2, "to": 355, "width": 1}, {"from": 2, "to": 359, "width": 1}, {"from": 2, "to": 360, "width": 1}, {"from": 2, "to": 365, "width": 1}, {"from": 2, "to": 366, "width": 1}, {"from": 2, "to": 367, "width": 1}, {"from": 2, "to": 368, "width": 1}, {"from": 2, "to": 369, "width": 1}, {"from": 2, "to": 370, "width": 1}, {"from": 2, "to": 371, "width": 1}, {"from": 2, "to": 372, "width": 1}, {"from": 2, "to": 373, "width": 1}, {"from": 2, "to": 375, "width": 1}, {"from": 2, "to": 380, "width": 1}, {"from": 2, "to": 385, "width": 1}, {"from": 2, "to": 390, "width": 1}, {"from": 2, "to": 395, "width": 1}, {"from": 2, "to": 402, "width": 1}, {"from": 2, "to": 411, "width": 1}, {"from": 2, "to": 420, "width": 1}, {"from": 2, "to": 432, "width": 1}, {"from": 2, "to": 433, "width": 1}, {"from": 2, "to": 434, "width": 1}, {"from": 2, "to": 435, "width": 1}, {"from": 2, "to": 437, "width": 1}, {"from": 2, "to": 438, "width": 1}, {"from": 2, "to": 439, "width": 1}, {"from": 2, "to": 450, "width": 1}, {"from": 2, "to": 451, "width": 1}, {"from": 2, "to": 452, "width": 1}, {"from": 2, "to": 461, "width": 1}, {"from": 2, "to": 471, "width": 1}, {"from": 2, "to": 475, "width": 1}, {"from": 2, "to": 481, "width": 1}, {"from": 2, "to": 482, "width": 1}, {"from": 2, "to": 483, "width": 1}, {"from": 2, "to": 484, "width": 1}, {"from": 2, "to": 490, "width": 1}, {"from": 2, "to": 500, "width": 1}, {"from": 2, "to": 501, "width": 1}, {"from": 2, "to": 510, "width": 1}, {"from": 2, "to": 516, "width": 1}, {"from": 2, "to": 517, "width": 1}, {"from": 2, "to": 522, "width": 1}, {"from": 2, "to": 530, "width": 1}, {"from": 2, "to": 531, "width": 1}, {"from": 2, "to": 540, "width": 1}, {"from": 2, "to": 541, "width": 1}, {"from": 2, "to": 551, "width": 1}, {"from": 2, "to": 552, "width": 1}, {"from": 2, "to": 553, "width": 1}, {"from": 2, "to": 560, "width": 1}, {"from": 2, "to": 565, "width": 1}, {"from": 2, "to": 570, "width": 1}, {"from": 2, "to": 571, "width": 1}, {"from": 2, "to": 572, "width": 1}, {"from": 2, "to": 580, "width": 1}, {"from": 2, "to": 581, "width": 1}, {"from": 2, "to": 590, "width": 1}, {"from": 2, "to": 591, "width": 1}, {"from": 2, "to": 600, "width": 1}, {"from": 2, "to": 616, "width": 1}, {"from": 2, "to": 625, "width": 1}, {"from": 2, "to": 640, "width": 1}, {"from": 2, "to": 645, "width": 1}, {"from": 2, "to": 651, "width": 1}, {"from": 2, "to": 652, "width": 1}, {"from": 2, "to": 660, "width": 1}, {"from": 2, "to": 663, "width": 1}, {"from": 2, "to": 666, "width": 1}, {"from": 2, "to": 670, "width": 1}, {"from": 2, "to": 679, "width": 1}, {"from": 2, "to": 690, "width": 1}, {"from": 2, "to": 694, "width": 1}, {"from": 2, "to": 696, "width": 1}, {"from": 2, "to": 698, "width": 1}, {"from": 2, "to": 700, "width": 1}, {"from": 2, "to": 701, "width": 1}, {"from": 2, "to": 702, "width": 1}, {"from": 2, "to": 703, "width": 1}, {"from": 2, "to": 704, "width": 1}, {"from": 2, "to": 705, "width": 1}, {"from": 2, "to": 710, "width": 1}, {"from": 2, "to": 712, "width": 1}, {"from": 2, "to": 732, "width": 1}, {"from": 2, "to": 740, "width": 1}, {"from": 2, "to": 750, "width": 1}, {"from": 2, "to": 770, "width": 1}, {"from": 2, "to": 771, "width": 1}, {"from": 2, "to": 780, "width": 1}, {"from": 2, "to": 781, "width": 1}, {"from": 2, "to": 790, "width": 1}, {"from": 2, "to": 800, "width": 1}, {"from": 2, "to": 811, "width": 1}, {"from": 2, "to": 812, "width": 1}, {"from": 2, "to": 816, "width": 1}, {"from": 2, "to": 820, "width": 1}, {"from": 2, "to": 830, "width": 1}, {"from": 2, "to": 835, "width": 1}, {"from": 2, "to": 840, "width": 1}, {"from": 2, "to": 850, "width": 1}, {"from": 2, "to": 860, "width": 1}, {"from": 2, "to": 900, "width": 1}, {"from": 2, "to": 910, "width": 1}, {"from": 2, "to": 920, "width": 1}, {"from": 2, "to": 940, "width": 1}, {"from": 2, "to": 950, "width": 1}, {"from": 2, "to": 955, "width": 1}, {"from": 2, "to": 983, "width": 1}, {"from": 2, "to": 986, "width": 1}, {"from": 2, "to": 987, "width": 1}, {"from": 2, "to": 990, "width": 1}, {"from": 200, "to": 20, "width": 1}, {"from": 200, "to": 31, "width": 1}, {"from": 200, "to": 40, "width": 1}, {"from": 200, "to": 42, "width": 1}, {"from": 200, "to": 51, "width": 1}, {"from": 200, "to": 52, "width": 1}, {"from": 200, "to": 53, "width": 1}, {"from": 200, "to": 54, "width": 1}, {"from": 200, "to": 55, "width": 1}, {"from": 200, "to": 56, "width": 1}, {"from": 200, "to": 57, "width": 1}, {"from": 200, "to": 58, "width": 1}, {"from": 200, "to": 60, "width": 1}, {"from": 200, "to": 70, "width": 1}, {"from": 200, "to": 80, "width": 1}, {"from": 200, "to": 92, "width": 1}, {"from": 200, "to": 94, "width": 1}, {"from": 200, "to": 100, "width": 1}, {"from": 200, "to": 101, "width": 1}, {"from": 200, "to": 110, "width": 1}, {"from": 200, "to": 130, "width": 1}, {"from": 200, "to": 135, "width": 1}, {"from": 200, "to": 140, "width": 1}, {"from": 200, "to": 145, "width": 1}, {"from": 200, "to": 150, "width": 1}, {"from": 200, "to": 155, "width": 1}, {"from": 200, "to": 160, "width": 1}, {"from": 200, "to": 165, "width": 1}, {"from": 200, "to": 205, "width": 1}, {"from": 200, "to": 210, "width": 1}, {"from": 200, "to": 211, "width": 1}, {"from": 200, "to": 212, "width": 1}, {"from": 200, "to": 220, "width": 1}, {"from": 200, "to": 225, "width": 1}, {"from": 200, "to": 230, "width": 1}, {"from": 200, "to": 235, "width": 1}, {"from": 200, "to": 255, "width": 1}, {"from": 200, "to": 290, "width": 1}, {"from": 200, "to": 305, "width": 1}, {"from": 200, "to": 310, "width": 1}, {"from": 200, "to": 316, "width": 1}, {"from": 200, "to": 317, "width": 1}, {"from": 200, "to": 325, "width": 1}, {"from": 200, "to": 338, "width": 1}, {"from": 200, "to": 339, "width": 1}, {"from": 200, "to": 343, "width": 1}, {"from": 200, "to": 344, "width": 1}, {"from": 200, "to": 345, "width": 1}, {"from": 200, "to": 346, "width": 1}, {"from": 200, "to": 349, "width": 1}, {"from": 200, "to": 350, "width": 1}, {"from": 200, "to": 352, "width": 1}, {"from": 200, "to": 355, "width": 1}, {"from": 200, "to": 359, "width": 1}, {"from": 200, "to": 360, "width": 1}, {"from": 200, "to": 365, "width": 1}, {"from": 200, "to": 366, "width": 1}, {"from": 200, "to": 367, "width": 1}, {"from": 200, "to": 368, "width": 1}, {"from": 200, "to": 369, "width": 1}, {"from": 200, "to": 370, "width": 1}, {"from": 200, "to": 371, "width": 1}, {"from": 200, "to": 372, "width": 1}, {"from": 200, "to": 373, "width": 1}, {"from": 200, "to": 375, "width": 1}, {"from": 200, "to": 380, "width": 1}, {"from": 200, "to": 385, "width": 1}, {"from": 200, "to": 390, "width": 1}, {"from": 200, "to": 395, "width": 1}, {"from": 200, "to": 411, "width": 1}, {"from": 200, "to": 420, "width": 1}, {"from": 200, "to": 433, "width": 1}, {"from": 200, "to": 435, "width": 1}, {"from": 200, "to": 437, "width": 1}, {"from": 200, "to": 451, "width": 1}, {"from": 200, "to": 452, "width": 1}, {"from": 200, "to": 471, "width": 1}, {"from": 200, "to": 475, "width": 1}, {"from": 200, "to": 481, "width": 1}, {"from": 200, "to": 490, "width": 1}, {"from": 200, "to": 500, "width": 1}, {"from": 200, "to": 501, "width": 1}, {"from": 200, "to": 510, "width": 1}, {"from": 200, "to": 517, "width": 1}, {"from": 200, "to": 530, "width": 1}, {"from": 200, "to": 531, "width": 1}, {"from": 200, "to": 540, "width": 1}, {"from": 200, "to": 541, "width": 1}, {"from": 200, "to": 551, "width": 1}, {"from": 200, "to": 553, "width": 1}, {"from": 200, "to": 560, "width": 1}, {"from": 200, "to": 565, "width": 1}, {"from": 200, "to": 571, "width": 1}, {"from": 200, "to": 572, "width": 1}, {"from": 200, "to": 590, "width": 1}, {"from": 200, "to": 600, "width": 1}, {"from": 200, "to": 616, "width": 1}, {"from": 200, "to": 625, "width": 1}, {"from": 200, "to": 630, "width": 1}, {"from": 200, "to": 640, "width": 1}, {"from": 200, "to": 645, "width": 1}, {"from": 200, "to": 651, "width": 1}, {"from": 200, "to": 652, "width": 1}, {"from": 200, "to": 660, "width": 1}, {"from": 200, "to": 663, "width": 1}, {"from": 200, "to": 666, "width": 1}, {"from": 200, "to": 670, "width": 1}, {"from": 200, "to": 679, "width": 1}, {"from": 200, "to": 690, "width": 1}, {"from": 200, "to": 692, "width": 1}, {"from": 200, "to": 694, "width": 1}, {"from": 200, "to": 696, "width": 1}, {"from": 200, "to": 698, "width": 1}, {"from": 200, "to": 700, "width": 1}, {"from": 200, "to": 701, "width": 1}, {"from": 200, "to": 703, "width": 1}, {"from": 200, "to": 704, "width": 1}, {"from": 200, "to": 705, "width": 1}, {"from": 200, "to": 710, "width": 1}, {"from": 200, "to": 712, "width": 1}, {"from": 200, "to": 731, "width": 1}, {"from": 200, "to": 732, "width": 1}, {"from": 200, "to": 740, "width": 1}, {"from": 200, "to": 750, "width": 1}, {"from": 200, "to": 770, "width": 1}, {"from": 200, "to": 771, "width": 1}, {"from": 200, "to": 780, "width": 1}, {"from": 200, "to": 781, "width": 1}, {"from": 200, "to": 790, "width": 1}, {"from": 200, "to": 800, "width": 1}, {"from": 200, "to": 816, "width": 1}, {"from": 200, "to": 820, "width": 1}, {"from": 200, "to": 830, "width": 1}, {"from": 200, "to": 835, "width": 1}, {"from": 200, "to": 840, "width": 1}, {"from": 200, "to": 900, "width": 1}, {"from": 200, "to": 910, "width": 1}, {"from": 200, "to": 920, "width": 1}, {"from": 200, "to": 950, "width": 1}, {"from": 200, "to": 955, "width": 1}, {"from": 220, "to": 20, "width": 1}, {"from": 220, "to": 40, "width": 1}, {"from": 220, "to": 58, "width": 1}, {"from": 220, "to": 70, "width": 1}, {"from": 220, "to": 90, "width": 1}, {"from": 220, "to": 91, "width": 1}, {"from": 220, "to": 92, "width": 1}, {"from": 220, "to": 94, "width": 1}, {"from": 220, "to": 95, "width": 1}, {"from": 220, "to": 100, "width": 1}, {"from": 220, "to": 101, "width": 1}, {"from": 220, "to": 130, "width": 1}, {"from": 220, "to": 140, "width": 1}, {"from": 220, "to": 145, "width": 1}, {"from": 220, "to": 150, "width": 1}, {"from": 220, "to": 155, "width": 1}, {"from": 220, "to": 160, "width": 1}, {"from": 220, "to": 165, "width": 1}, {"from": 220, "to": 205, "width": 1}, {"from": 220, "to": 210, "width": 1}, {"from": 220, "to": 211, "width": 1}, {"from": 220, "to": 212, "width": 1}, {"from": 220, "to": 221, "width": 1}, {"from": 220, "to": 225, "width": 1}, {"from": 220, "to": 230, "width": 1}, {"from": 220, "to": 232, "width": 1}, {"from": 220, "to": 235, "width": 1}, {"from": 220, "to": 255, "width": 1}, {"from": 220, "to": 290, "width": 1}, {"from": 220, "to": 305, "width": 1}, {"from": 220, "to": 310, "width": 1}, {"from": 220, "to": 316, "width": 1}, {"from": 220, "to": 317, "width": 1}, {"from": 220, "to": 325, "width": 1}, {"from": 220, "to": 331, "width": 1}, {"from": 220, "to": 338, "width": 1}, {"from": 220, "to": 339, "width": 1}, {"from": 220, "to": 343, "width": 1}, {"from": 220, "to": 344, "width": 1}, {"from": 220, "to": 345, "width": 1}, {"from": 220, "to": 346, "width": 1}, {"from": 220, "to": 349, "width": 1}, {"from": 220, "to": 350, "width": 1}, {"from": 220, "to": 352, "width": 1}, {"from": 220, "to": 355, "width": 1}, {"from": 220, "to": 359, "width": 1}, {"from": 220, "to": 360, "width": 1}, {"from": 220, "to": 365, "width": 1}, {"from": 220, "to": 366, "width": 1}, {"from": 220, "to": 367, "width": 1}, {"from": 220, "to": 368, "width": 1}, {"from": 220, "to": 369, "width": 1}, {"from": 220, "to": 370, "width": 1}, {"from": 220, "to": 371, "width": 1}, {"from": 220, "to": 372, "width": 1}, {"from": 220, "to": 373, "width": 1}, {"from": 220, "to": 375, "width": 1}, {"from": 220, "to": 380, "width": 1}, {"from": 220, "to": 385, "width": 1}, {"from": 220, "to": 390, "width": 1}, {"from": 220, "to": 395, "width": 1}, {"from": 220, "to": 402, "width": 1}, {"from": 220, "to": 404, "width": 1}, {"from": 220, "to": 411, "width": 1}, {"from": 220, "to": 420, "width": 1}, {"from": 220, "to": 432, "width": 1}, {"from": 220, "to": 433, "width": 1}, {"from": 220, "to": 434, "width": 1}, {"from": 220, "to": 435, "width": 1}, {"from": 220, "to": 436, "width": 1}, {"from": 220, "to": 437, "width": 1}, {"from": 220, "to": 438, "width": 1}, {"from": 220, "to": 439, "width": 1}, {"from": 220, "to": 450, "width": 1}, {"from": 220, "to": 452, "width": 1}, {"from": 220, "to": 461, "width": 1}, {"from": 220, "to": 471, "width": 1}, {"from": 220, "to": 475, "width": 1}, {"from": 220, "to": 481, "width": 1}, {"from": 220, "to": 482, "width": 1}, {"from": 220, "to": 483, "width": 1}, {"from": 220, "to": 484, "width": 1}, {"from": 220, "to": 490, "width": 1}, {"from": 220, "to": 501, "width": 1}, {"from": 220, "to": 510, "width": 1}, {"from": 220, "to": 516, "width": 1}, {"from": 220, "to": 517, "width": 1}, {"from": 220, "to": 522, "width": 1}, {"from": 220, "to": 530, "width": 1}, {"from": 220, "to": 531, "width": 1}, {"from": 220, "to": 540, "width": 1}, {"from": 220, "to": 541, "width": 1}, {"from": 220, "to": 552, "width": 1}, {"from": 220, "to": 553, "width": 1}, {"from": 220, "to": 560, "width": 1}, {"from": 220, "to": 565, "width": 1}, {"from": 220, "to": 580, "width": 1}, {"from": 220, "to": 581, "width": 1}, {"from": 220, "to": 590, "width": 1}, {"from": 220, "to": 591, "width": 1}, {"from": 220, "to": 600, "width": 1}, {"from": 220, "to": 615, "width": 1}, {"from": 220, "to": 616, "width": 1}, {"from": 220, "to": 620, "width": 1}, {"from": 220, "to": 625, "width": 1}, {"from": 220, "to": 630, "width": 1}, {"from": 220, "to": 640, "width": 1}, {"from": 220, "to": 645, "width": 1}, {"from": 220, "to": 651, "width": 1}, {"from": 220, "to": 652, "width": 1}, {"from": 220, "to": 660, "width": 1}, {"from": 220, "to": 663, "width": 1}, {"from": 220, "to": 666, "width": 1}, {"from": 220, "to": 670, "width": 1}, {"from": 220, "to": 679, "width": 1}, {"from": 220, "to": 690, "width": 1}, {"from": 220, "to": 694, "width": 1}, {"from": 220, "to": 696, "width": 1}, {"from": 220, "to": 698, "width": 1}, {"from": 220, "to": 700, "width": 1}, {"from": 220, "to": 701, "width": 1}, {"from": 220, "to": 704, "width": 1}, {"from": 220, "to": 705, "width": 1}, {"from": 220, "to": 710, "width": 1}, {"from": 220, "to": 712, "width": 1}, {"from": 220, "to": 732, "width": 1}, {"from": 220, "to": 740, "width": 1}, {"from": 220, "to": 750, "width": 1}, {"from": 220, "to": 770, "width": 1}, {"from": 220, "to": 771, "width": 1}, {"from": 220, "to": 775, "width": 1}, {"from": 220, "to": 780, "width": 1}, {"from": 220, "to": 800, "width": 1}, {"from": 220, "to": 811, "width": 1}, {"from": 220, "to": 812, "width": 1}, {"from": 220, "to": 816, "width": 1}, {"from": 220, "to": 820, "width": 1}, {"from": 220, "to": 830, "width": 1}, {"from": 220, "to": 835, "width": 1}, {"from": 220, "to": 840, "width": 1}, {"from": 220, "to": 850, "width": 1}, {"from": 220, "to": 900, "width": 1}, {"from": 220, "to": 920, "width": 1}, {"from": 710, "to": 20, "width": 1}, {"from": 710, "to": 40, "width": 1}, {"from": 710, "to": 54, "width": 1}, {"from": 710, "to": 58, "width": 1}, {"from": 710, "to": 70, "width": 1}, {"from": 710, "to": 100, "width": 1}, {"from": 710, "to": 101, "width": 1}, {"from": 710, "to": 110, "width": 1}, {"from": 710, "to": 115, "width": 1}, {"from": 710, "to": 130, "width": 1}, {"from": 710, "to": 135, "width": 1}, {"from": 710, "to": 140, "width": 1}, {"from": 710, "to": 145, "width": 1}, {"from": 710, "to": 155, "width": 1}, {"from": 710, "to": 160, "width": 1}, {"from": 710, "to": 165, "width": 1}, {"from": 710, "to": 205, "width": 1}, {"from": 710, "to": 210, "width": 1}, {"from": 710, "to": 211, "width": 1}, {"from": 710, "to": 212, "width": 1}, {"from": 710, "to": 225, "width": 1}, {"from": 710, "to": 230, "width": 1}, {"from": 710, "to": 235, "width": 1}, {"from": 710, "to": 255, "width": 1}, {"from": 710, "to": 290, "width": 1}, {"from": 710, "to": 305, "width": 1}, {"from": 710, "to": 310, "width": 1}, {"from": 710, "to": 316, "width": 1}, {"from": 710, "to": 317, "width": 1}, {"from": 710, "to": 325, "width": 1}, {"from": 710, "to": 338, "width": 1}, {"from": 710, "to": 339, "width": 1}, {"from": 710, "to": 344, "width": 1}, {"from": 710, "to": 345, "width": 1}, {"from": 710, "to": 346, "width": 1}, {"from": 710, "to": 349, "width": 1}, {"from": 710, "to": 350, "width": 1}, {"from": 710, "to": 352, "width": 1}, {"from": 710, "to": 355, "width": 1}, {"from": 710, "to": 359, "width": 1}, {"from": 710, "to": 360, "width": 1}, {"from": 710, "to": 365, "width": 1}, {"from": 710, "to": 367, "width": 1}, {"from": 710, "to": 368, "width": 1}, {"from": 710, "to": 369, "width": 1}, {"from": 710, "to": 370, "width": 1}, {"from": 710, "to": 371, "width": 1}, {"from": 710, "to": 373, "width": 1}, {"from": 710, "to": 375, "width": 1}, {"from": 710, "to": 380, "width": 1}, {"from": 710, "to": 385, "width": 1}, {"from": 710, "to": 390, "width": 1}, {"from": 710, "to": 395, "width": 1}, {"from": 710, "to": 404, "width": 1}, {"from": 710, "to": 411, "width": 1}, {"from": 710, "to": 432, "width": 1}, {"from": 710, "to": 434, "width": 1}, {"from": 710, "to": 435, "width": 1}, {"from": 710, "to": 436, "width": 1}, {"from": 710, "to": 437, "width": 1}, {"from": 710, "to": 438, "width": 1}, {"from": 710, "to": 451, "width": 1}, {"from": 710, "to": 452, "width": 1}, {"from": 710, "to": 461, "width": 1}, {"from": 710, "to": 471, "width": 1}, {"from": 710, "to": 475, "width": 1}, {"from": 710, "to": 481, "width": 1}, {"from": 710, "to": 482, "width": 1}, {"from": 710, "to": 484, "width": 1}, {"from": 710, "to": 490, "width": 1}, {"from": 710, "to": 500, "width": 1}, {"from": 710, "to": 501, "width": 1}, {"from": 710, "to": 510, "width": 1}, {"from": 710, "to": 516, "width": 1}, {"from": 710, "to": 517, "width": 1}, {"from": 710, "to": 522, "width": 1}, {"from": 710, "to": 530, "width": 1}, {"from": 710, "to": 531, "width": 1}, {"from": 710, "to": 540, "width": 1}, {"from": 710, "to": 541, "width": 1}, {"from": 710, "to": 551, "width": 1}, {"from": 710, "to": 552, "width": 1}, {"from": 710, "to": 560, "width": 1}, {"from": 710, "to": 565, "width": 1}, {"from": 710, "to": 570, "width": 1}, {"from": 710, "to": 571, "width": 1}, {"from": 710, "to": 580, "width": 1}, {"from": 710, "to": 590, "width": 1}, {"from": 710, "to": 600, "width": 1}, {"from": 710, "to": 615, "width": 1}, {"from": 710, "to": 616, "width": 1}, {"from": 710, "to": 620, "width": 1}, {"from": 710, "to": 625, "width": 1}, {"from": 710, "to": 630, "width": 1}, {"from": 710, "to": 640, "width": 1}, {"from": 710, "to": 645, "width": 1}, {"from": 710, "to": 651, "width": 1}, {"from": 710, "to": 652, "width": 1}, {"from": 710, "to": 660, "width": 1}, {"from": 710, "to": 663, "width": 1}, {"from": 710, "to": 666, "width": 1}, {"from": 710, "to": 670, "width": 1}, {"from": 710, "to": 679, "width": 1}, {"from": 710, "to": 690, "width": 1}, {"from": 710, "to": 692, "width": 1}, {"from": 710, "to": 694, "width": 1}, {"from": 710, "to": 696, "width": 1}, {"from": 710, "to": 698, "width": 1}, {"from": 710, "to": 700, "width": 1}, {"from": 710, "to": 701, "width": 1}, {"from": 710, "to": 702, "width": 1}, {"from": 710, "to": 703, "width": 1}, {"from": 710, "to": 704, "width": 1}, {"from": 710, "to": 705, "width": 1}, {"from": 710, "to": 712, "width": 1}, {"from": 710, "to": 731, "width": 1}, {"from": 710, "to": 732, "width": 1}, {"from": 710, "to": 740, "width": 1}, {"from": 710, "to": 750, "width": 1}, {"from": 710, "to": 770, "width": 1}, {"from": 710, "to": 771, "width": 1}, {"from": 710, "to": 775, "width": 1}, {"from": 710, "to": 780, "width": 1}, {"from": 710, "to": 790, "width": 1}, {"from": 710, "to": 800, "width": 1}, {"from": 710, "to": 811, "width": 1}, {"from": 710, "to": 812, "width": 1}, {"from": 710, "to": 816, "width": 1}, {"from": 710, "to": 820, "width": 1}, {"from": 710, "to": 830, "width": 1}, {"from": 710, "to": 835, "width": 1}, {"from": 710, "to": 840, "width": 1}, {"from": 710, "to": 850, "width": 1}, {"from": 710, "to": 860, "width": 1}, {"from": 710, "to": 900, "width": 1}, {"from": 710, "to": 910, "width": 1}, {"from": 710, "to": 920, "width": 1}, {"from": 710, "to": 950, "width": 1}, {"from": "2", "to": "20"}, {"from": "2", "to": "31"}, {"from": "2", "to": "41"}, {"from": "2", "to": "42"}, {"from": "2", "to": "51"}, {"from": "2", "to": "52"}, {"from": "2", "to": "53"}, {"from": "2", "to": "54"}, {"from": "2", "to": "55"}, {"from": "2", "to": "56"}, {"from": "2", "to": "57"}, {"from": "2", "to": "58"}, {"from": "2", "to": "60"}, {"from": "2", "to": "70"}, {"from": "2", "to": "80"}, {"from": "2", "to": "90"}, {"from": "2", "to": "91"}, {"from": "2", "to": "92"}, {"from": "2", "to": "93"}, {"from": "2", "to": "94"}, {"from": "2", "to": "95"}, {"from": "2", "to": "100"}, {"from": "2", "to": "101"}, {"from": "2", "to": "110"}, {"from": "2", "to": "115"}, {"from": "2", "to": "135"}, {"from": "2", "to": "140"}, {"from": "2", "to": "145"}, {"from": "2", "to": "150"}, {"from": "2", "to": "155"}, {"from": "2", "to": "160"}, {"from": "2", "to": "165"}, {"from": "2", "to": "200"}, {"from": "2", "to": "205"}, {"from": "2", "to": "210"}, {"from": "2", "to": "211"}, {"from": "2", "to": "212"}, {"from": "2", "to": "220"}, {"from": "2", "to": "223"}, {"from": "2", "to": "225"}, {"from": "2", "to": "230"}, {"from": "2", "to": "232"}, {"from": "2", "to": "235"}, {"from": "2", "to": "255"}, {"from": "2", "to": "290"}, {"from": "2", "to": "305"}, {"from": "2", "to": "310"}, {"from": "2", "to": "316"}, {"from": "2", "to": "317"}, {"from": "2", "to": "325"}, {"from": "2", "to": "338"}, {"from": "2", "to": "339"}, {"from": "2", "to": "343"}, {"from": "2", "to": "344"}, {"from": "2", "to": "345"}, {"from": "2", "to": "346"}, {"from": "2", "to": "349"}, {"from": "2", "to": "350"}, {"from": "2", "to": "352"}, {"from": "2", "to": "355"}, {"from": "2", "to": "359"}, {"from": "2", "to": "360"}, {"from": "2", "to": "365"}, {"from": "2", "to": "366"}, {"from": "2", "to": "367"}, {"from": "2", "to": "368"}, {"from": "2", "to": "369"}, {"from": "2", "to": "370"}, {"from": "2", "to": "371"}, {"from": "2", "to": "372"}, {"from": "2", "to": "373"}, {"from": "2", "to": "375"}, {"from": "2", "to": "380"}, {"from": "2", "to": "385"}, {"from": "2", "to": "390"}, {"from": "2", "to": "395"}, {"from": "2", "to": "402"}, {"from": "2", "to": "411"}, {"from": "2", "to": "420"}, {"from": "2", "to": "432"}, {"from": "2", "to": "433"}, {"from": "2", "to": "434"}, {"from": "2", "to": "435"}, {"from": "2", "to": "437"}, {"from": "2", "to": "438"}, {"from": "2", "to": "439"}, {"from": "2", "to": "450"}, {"from": "2", "to": "451"}, {"from": "2", "to": "452"}, {"from": "2", "to": "461"}, {"from": "2", "to": "471"}, {"from": "2", "to": "475"}, {"from": "2", "to": "481"}, {"from": "2", "to": "482"}, {"from": "2", "to": "483"}, {"from": "2", "to": "484"}, {"from": "2", "to": "490"}, {"from": "2", "to": "500"}, {"from": "2", "to": "501"}, {"from": "2", "to": "510"}, {"from": "2", "to": "516"}, {"from": "2", "to": "517"}, {"from": "2", "to": "522"}, {"from": "2", "to": "530"}, {"from": "2", "to": "531"}, {"from": "2", "to": "540"}, {"from": "2", "to": "541"}, {"from": "2", "to": "551"}, {"from": "2", "to": "552"}, {"from": "2", "to": "553"}, {"from": "2", "to": "560"}, {"from": "2", "to": "565"}, {"from": "2", "to": "570"}, {"from": "2", "to": "571"}, {"from": "2", "to": "572"}, {"from": "2", "to": "580"}, {"from": "2", "to": "581"}, {"from": "2", "to": "590"}, {"from": "2", "to": "591"}, {"from": "2", "to": "600"}, {"from": "2", "to": "616"}, {"from": "2", "to": "625"}, {"from": "2", "to": "640"}, {"from": "2", "to": "645"}, {"from": "2", "to": "651"}, {"from": "2", "to": "652"}, {"from": "2", "to": "660"}, {"from": "2", "to": "663"}, {"from": "2", "to": "666"}, {"from": "2", "to": "670"}, {"from": "2", "to": "679"}, {"from": "2", "to": "690"}, {"from": "2", "to": "694"}, {"from": "2", "to": "696"}, {"from": "2", "to": "698"}, {"from": "2", "to": "700"}, {"from": "2", "to": "701"}, {"from": "2", "to": "702"}, {"from": "2", "to": "703"}, {"from": "2", "to": "704"}, {"from": "2", "to": "705"}, {"from": "2", "to": "710"}, {"from": "2", "to": "712"}, {"from": "2", "to": "732"}, {"from": "2", "to": "740"}, {"from": "2", "to": "750"}, {"from": "2", "to": "770"}, {"from": "2", "to": "771"}, {"from": "2", "to": "780"}, {"from": "2", "to": "781"}, {"from": "2", "to": "790"}, {"from": "2", "to": "800"}, {"from": "2", "to": "811"}, {"from": "2", "to": "812"}, {"from": "2", "to": "816"}, {"from": "2", "to": "820"}, {"from": "2", "to": "830"}, {"from": "2", "to": "835"}, {"from": "2", "to": "840"}, {"from": "2", "to": "850"}, {"from": "2", "to": "860"}, {"from": "2", "to": "900"}, {"from": "2", "to": "910"}, {"from": "2", "to": "920"}, {"from": "2", "to": "940"}, {"from": "2", "to": "950"}, {"from": "2", "to": "955"}, {"from": "2", "to": "983"}, {"from": "2", "to": "986"}, {"from": "2", "to": "987"}, {"from": "2", "to": "990"}, {"from": "200", "to": "20"}, {"from": "200", "to": "31"}, {"from": "200", "to": "40"}, {"from": "200", "to": "42"}, {"from": "200", "to": "51"}, {"from": "200", "to": "52"}, {"from": "200", "to": "53"}, {"from": "200", "to": "54"}, {"from": "200", "to": "55"}, {"from": "200", "to": "56"}, {"from": "200", "to": "57"}, {"from": "200", "to": "58"}, {"from": "200", "to": "60"}, {"from": "200", "to": "70"}, {"from": "200", "to": "80"}, {"from": "200", "to": "92"}, {"from": "200", "to": "94"}, {"from": "200", "to": "100"}, {"from": "200", "to": "101"}, {"from": "200", "to": "110"}, {"from": "200", "to": "130"}, {"from": "200", "to": "135"}, {"from": "200", "to": "140"}, {"from": "200", "to": "145"}, {"from": "200", "to": "150"}, {"from": "200", "to": "155"}, {"from": "200", "to": "160"}, {"from": "200", "to": "165"}, {"from": "200", "to": "205"}, {"from": "200", "to": "210"}, {"from": "200", "to": "211"}, {"from": "200", "to": "212"}, {"from": "200", "to": "220"}, {"from": "200", "to": "225"}, {"from": "200", "to": "230"}, {"from": "200", "to": "235"}, {"from": "200", "to": "255"}, {"from": "200", "to": "290"}, {"from": "200", "to": "305"}, {"from": "200", "to": "310"}, {"from": "200", "to": "316"}, {"from": "200", "to": "317"}, {"from": "200", "to": "325"}, {"from": "200", "to": "338"}, {"from": "200", "to": "339"}, {"from": "200", "to": "343"}, {"from": "200", "to": "344"}, {"from": "200", "to": "345"}, {"from": "200", "to": "346"}, {"from": "200", "to": "349"}, {"from": "200", "to": "350"}, {"from": "200", "to": "352"}, {"from": "200", "to": "355"}, {"from": "200", "to": "359"}, {"from": "200", "to": "360"}, {"from": "200", "to": "365"}, {"from": "200", "to": "366"}, {"from": "200", "to": "367"}, {"from": "200", "to": "368"}, {"from": "200", "to": "369"}, {"from": "200", "to": "370"}, {"from": "200", "to": "371"}, {"from": "200", "to": "372"}, {"from": "200", "to": "373"}, {"from": "200", "to": "375"}, {"from": "200", "to": "380"}, {"from": "200", "to": "385"}, {"from": "200", "to": "390"}, {"from": "200", "to": "395"}, {"from": "200", "to": "411"}, {"from": "200", "to": "420"}, {"from": "200", "to": "433"}, {"from": "200", "to": "435"}, {"from": "200", "to": "437"}, {"from": "200", "to": "451"}, {"from": "200", "to": "452"}, {"from": "200", "to": "471"}, {"from": "200", "to": "475"}, {"from": "200", "to": "481"}, {"from": "200", "to": "490"}, {"from": "200", "to": "500"}, {"from": "200", "to": "501"}, {"from": "200", "to": "510"}, {"from": "200", "to": "517"}, {"from": "200", "to": "530"}, {"from": "200", "to": "531"}, {"from": "200", "to": "540"}, {"from": "200", "to": "541"}, {"from": "200", "to": "551"}, {"from": "200", "to": "553"}, {"from": "200", "to": "560"}, {"from": "200", "to": "565"}, {"from": "200", "to": "571"}, {"from": "200", "to": "572"}, {"from": "200", "to": "590"}, {"from": "200", "to": "600"}, {"from": "200", "to": "616"}, {"from": "200", "to": "625"}, {"from": "200", "to": "630"}, {"from": "200", "to": "640"}, {"from": "200", "to": "645"}, {"from": "200", "to": "651"}, {"from": "200", "to": "652"}, {"from": "200", "to": "660"}, {"from": "200", "to": "663"}, {"from": "200", "to": "666"}, {"from": "200", "to": "670"}, {"from": "200", "to": "679"}, {"from": "200", "to": "690"}, {"from": "200", "to": "692"}, {"from": "200", "to": "694"}, {"from": "200", "to": "696"}, {"from": "200", "to": "698"}, {"from": "200", "to": "700"}, {"from": "200", "to": "701"}, {"from": "200", "to": "703"}, {"from": "200", "to": "704"}, {"from": "200", "to": "705"}, {"from": "200", "to": "710"}, {"from": "200", "to": "712"}, {"from": "200", "to": "731"}, {"from": "200", "to": "732"}, {"from": "200", "to": "740"}, {"from": "200", "to": "750"}, {"from": "200", "to": "770"}, {"from": "200", "to": "771"}, {"from": "200", "to": "780"}, {"from": "200", "to": "781"}, {"from": "200", "to": "790"}, {"from": "200", "to": "800"}, {"from": "200", "to": "816"}, {"from": "200", "to": "820"}, {"from": "200", "to": "830"}, {"from": "200", "to": "835"}, {"from": "200", "to": "840"}, {"from": "200", "to": "900"}, {"from": "200", "to": "910"}, {"from": "200", "to": "920"}, {"from": "200", "to": "950"}, {"from": "200", "to": "955"}, {"from": "220", "to": "20"}, {"from": "220", "to": "40"}, {"from": "220", "to": "58"}, {"from": "220", "to": "70"}, {"from": "220", "to": "90"}, {"from": "220", "to": "91"}, {"from": "220", "to": "92"}, {"from": "220", "to": "94"}, {"from": "220", "to": "95"}, {"from": "220", "to": "100"}, {"from": "220", "to": "101"}, {"from": "220", "to": "130"}, {"from": "220", "to": "140"}, {"from": "220", "to": "145"}, {"from": "220", "to": "150"}, {"from": "220", "to": "155"}, {"from": "220", "to": "160"}, {"from": "220", "to": "165"}, {"from": "220", "to": "205"}, {"from": "220", "to": "210"}, {"from": "220", "to": "211"}, {"from": "220", "to": "212"}, {"from": "220", "to": "221"}, {"from": "220", "to": "225"}, {"from": "220", "to": "230"}, {"from": "220", "to": "232"}, {"from": "220", "to": "235"}, {"from": "220", "to": "255"}, {"from": "220", "to": "290"}, {"from": "220", "to": "305"}, {"from": "220", "to": "310"}, {"from": "220", "to": "316"}, {"from": "220", "to": "317"}, {"from": "220", "to": "325"}, {"from": "220", "to": "331"}, {"from": "220", "to": "338"}, {"from": "220", "to": "339"}, {"from": "220", "to": "343"}, {"from": "220", "to": "344"}, {"from": "220", "to": "345"}, {"from": "220", "to": "346"}, {"from": "220", "to": "349"}, {"from": "220", "to": "350"}, {"from": "220", "to": "352"}, {"from": "220", "to": "355"}, {"from": "220", "to": "359"}, {"from": "220", "to": "360"}, {"from": "220", "to": "365"}, {"from": "220", "to": "366"}, {"from": "220", "to": "367"}, {"from": "220", "to": "368"}, {"from": "220", "to": "369"}, {"from": "220", "to": "370"}, {"from": "220", "to": "371"}, {"from": "220", "to": "372"}, {"from": "220", "to": "373"}, {"from": "220", "to": "375"}, {"from": "220", "to": "380"}, {"from": "220", "to": "385"}, {"from": "220", "to": "390"}, {"from": "220", "to": "395"}, {"from": "220", "to": "402"}, {"from": "220", "to": "404"}, {"from": "220", "to": "411"}, {"from": "220", "to": "420"}, {"from": "220", "to": "432"}, {"from": "220", "to": "433"}, {"from": "220", "to": "434"}, {"from": "220", "to": "435"}, {"from": "220", "to": "436"}, {"from": "220", "to": "437"}, {"from": "220", "to": "438"}, {"from": "220", "to": "439"}, {"from": "220", "to": "450"}, {"from": "220", "to": "452"}, {"from": "220", "to": "461"}, {"from": "220", "to": "471"}, {"from": "220", "to": "475"}, {"from": "220", "to": "481"}, {"from": "220", "to": "482"}, {"from": "220", "to": "483"}, {"from": "220", "to": "484"}, {"from": "220", "to": "490"}, {"from": "220", "to": "501"}, {"from": "220", "to": "510"}, {"from": "220", "to": "516"}, {"from": "220", "to": "517"}, {"from": "220", "to": "522"}, {"from": "220", "to": "530"}, {"from": "220", "to": "531"}, {"from": "220", "to": "540"}, {"from": "220", "to": "541"}, {"from": "220", "to": "552"}, {"from": "220", "to": "553"}, {"from": "220", "to": "560"}, {"from": "220", "to": "565"}, {"from": "220", "to": "580"}, {"from": "220", "to": "581"}, {"from": "220", "to": "590"}, {"from": "220", "to": "591"}, {"from": "220", "to": "600"}, {"from": "220", "to": "615"}, {"from": "220", "to": "616"}, {"from": "220", "to": "620"}, {"from": "220", "to": "625"}, {"from": "220", "to": "630"}, {"from": "220", "to": "640"}, {"from": "220", "to": "645"}, {"from": "220", "to": "651"}, {"from": "220", "to": "652"}, {"from": "220", "to": "660"}, {"from": "220", "to": "663"}, {"from": "220", "to": "666"}, {"from": "220", "to": "670"}, {"from": "220", "to": "679"}, {"from": "220", "to": "690"}, {"from": "220", "to": "694"}, {"from": "220", "to": "696"}, {"from": "220", "to": "698"}, {"from": "220", "to": "700"}, {"from": "220", "to": "701"}, {"from": "220", "to": "704"}, {"from": "220", "to": "705"}, {"from": "220", "to": "710"}, {"from": "220", "to": "712"}, {"from": "220", "to": "732"}, {"from": "220", "to": "740"}, {"from": "220", "to": "750"}, {"from": "220", "to": "770"}, {"from": "220", "to": "771"}, {"from": "220", "to": "775"}, {"from": "220", "to": "780"}, {"from": "220", "to": "800"}, {"from": "220", "to": "811"}, {"from": "220", "to": "812"}, {"from": "220", "to": "816"}, {"from": "220", "to": "820"}, {"from": "220", "to": "830"}, {"from": "220", "to": "835"}, {"from": "220", "to": "840"}, {"from": "220", "to": "850"}, {"from": "220", "to": "900"}, {"from": "220", "to": "920"}, {"from": "710", "to": "20"}, {"from": "710", "to": "40"}, {"from": "710", "to": "54"}, {"from": "710", "to": "58"}, {"from": "710", "to": "70"}, {"from": "710", "to": "100"}, {"from": "710", "to": "101"}, {"from": "710", "to": "110"}, {"from": "710", "to": "115"}, {"from": "710", "to": "130"}, {"from": "710", "to": "135"}, {"from": "710", "to": "140"}, {"from": "710", "to": "145"}, {"from": "710", "to": "155"}, {"from": "710", "to": "160"}, {"from": "710", "to": "165"}, {"from": "710", "to": "205"}, {"from": "710", "to": "210"}, {"from": "710", "to": "211"}, {"from": "710", "to": "212"}, {"from": "710", "to": "225"}, {"from": "710", "to": "230"}, {"from": "710", "to": "235"}, {"from": "710", "to": "255"}, {"from": "710", "to": "290"}, {"from": "710", "to": "305"}, {"from": "710", "to": "310"}, {"from": "710", "to": "316"}, {"from": "710", "to": "317"}, {"from": "710", "to": "325"}, {"from": "710", "to": "338"}, {"from": "710", "to": "339"}, {"from": "710", "to": "344"}, {"from": "710", "to": "345"}, {"from": "710", "to": "346"}, {"from": "710", "to": "349"}, {"from": "710", "to": "350"}, {"from": "710", "to": "352"}, {"from": "710", "to": "355"}, {"from": "710", "to": "359"}, {"from": "710", "to": "360"}, {"from": "710", "to": "365"}, {"from": "710", "to": "367"}, {"from": "710", "to": "368"}, {"from": "710", "to": "369"}, {"from": "710", "to": "370"}, {"from": "710", "to": "371"}, {"from": "710", "to": "373"}, {"from": "710", "to": "375"}, {"from": "710", "to": "380"}, {"from": "710", "to": "385"}, {"from": "710", "to": "390"}, {"from": "710", "to": "395"}, {"from": "710", "to": "404"}, {"from": "710", "to": "411"}, {"from": "710", "to": "432"}, {"from": "710", "to": "434"}, {"from": "710", "to": "435"}, {"from": "710", "to": "436"}, {"from": "710", "to": "437"}, {"from": "710", "to": "438"}, {"from": "710", "to": "451"}, {"from": "710", "to": "452"}, {"from": "710", "to": "461"}, {"from": "710", "to": "471"}, {"from": "710", "to": "475"}, {"from": "710", "to": "481"}, {"from": "710", "to": "482"}, {"from": "710", "to": "484"}, {"from": "710", "to": "490"}, {"from": "710", "to": "500"}, {"from": "710", "to": "501"}, {"from": "710", "to": "510"}, {"from": "710", "to": "516"}, {"from": "710", "to": "517"}, {"from": "710", "to": "522"}, {"from": "710", "to": "530"}, {"from": "710", "to": "531"}, {"from": "710", "to": "540"}, {"from": "710", "to": "541"}, {"from": "710", "to": "551"}, {"from": "710", "to": "552"}, {"from": "710", "to": "560"}, {"from": "710", "to": "565"}, {"from": "710", "to": "570"}, {"from": "710", "to": "571"}, {"from": "710", "to": "580"}, {"from": "710", "to": "590"}, {"from": "710", "to": "600"}, {"from": "710", "to": "615"}, {"from": "710", "to": "616"}, {"from": "710", "to": "620"}, {"from": "710", "to": "625"}, {"from": "710", "to": "630"}, {"from": "710", "to": "640"}, {"from": "710", "to": "645"}, {"from": "710", "to": "651"}, {"from": "710", "to": "652"}, {"from": "710", "to": "660"}, {"from": "710", "to": "663"}, {"from": "710", "to": "666"}, {"from": "710", "to": "670"}, {"from": "710", "to": "679"}, {"from": "710", "to": "690"}, {"from": "710", "to": "692"}, {"from": "710", "to": "694"}, {"from": "710", "to": "696"}, {"from": "710", "to": "698"}, {"from": "710", "to": "700"}, {"from": "710", "to": "701"}, {"from": "710", "to": "702"}, {"from": "710", "to": "703"}, {"from": "710", "to": "704"}, {"from": "710", "to": "705"}, {"from": "710", "to": "712"}, {"from": "710", "to": "731"}, {"from": "710", "to": "732"}, {"from": "710", "to": "740"}, {"from": "710", "to": "750"}, {"from": "710", "to": "770"}, {"from": "710", "to": "771"}, {"from": "710", "to": "775"}, {"from": "710", "to": "780"}, {"from": "710", "to": "790"}, {"from": "710", "to": "800"}, {"from": "710", "to": "811"}, {"from": "710", "to": "812"}, {"from": "710", "to": "816"}, {"from": "710", "to": "820"}, {"from": "710", "to": "830"}, {"from": "710", "to": "835"}, {"from": "710", "to": "840"}, {"from": "710", "to": "850"}, {"from": "710", "to": "860"}, {"from": "710", "to": "900"}, {"from": "710", "to": "910"}, {"from": "710", "to": "920"}, {"from": "710", "to": "950"}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {
+    "configure": {
+        "enabled": true,
+        "filter": [
+            "physics",
+            "nodes"
+        ]
+    },
+    "edges": {
+        "color": {
+            "inherit": true
+        },
+        "smooth": {
+            "enabled": true,
+            "type": "dynamic"
+        }
+    },
+    "interaction": {
+        "dragNodes": true,
+        "hideEdgesOnDrag": false,
+        "hideNodesOnDrag": false
+    },
+    "physics": {
+        "enabled": true,
+        "stabilization": {
+            "enabled": true,
+            "fit": true,
+            "iterations": 1000,
+            "onlyDynamicEdges": false,
+            "updateInterval": 50
+        }
+    }
+};
+
+                  
+
+
+                  
+                  // if this network requires displaying the configure window,
+                  // put it in its div
+                  options.configure["container"] = document.getElementById("config");
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+                    network.on("selectNode", neighbourhoodHighlight);
+                  
+
+                  
+
+
+                  
+                      network.on("stabilizationProgress", function(params) {
+                          document.getElementById('loadingBar').removeAttribute("style");
+                          var maxWidth = 496;
+                          var minWidth = 20;
+                          var widthFactor = params.iterations/params.total;
+                          var width = Math.max(minWidth,maxWidth * widthFactor);
+                          document.getElementById('bar').style.width = width + 'px';
+                          document.getElementById('text').innerHTML = Math.round(widthFactor*100) + '%';
+                      });
+                      network.once("stabilizationIterationsDone", function() {
+                          document.getElementById('text').innerHTML = '100%';
+                          document.getElementById('bar').style.width = '496px';
+                          document.getElementById('loadingBar').style.opacity = 0;
+                          // really clean the dom element
+                          setTimeout(function () {document.getElementById('loadingBar').style.display = 'none';}, 500);
+                      });
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    </body>
+</html>
