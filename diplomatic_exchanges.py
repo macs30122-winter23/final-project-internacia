@@ -93,7 +93,7 @@ def compute_centrality_measures(G_per_year, year):
                                                  weight='DR_at_2')
     closeness_dict = nx.closeness_centrality(G_per_year.to_undirected(),
                                              distance='DR_at_2')
-    degree_dict = nx.degree(G_per_year, weight='DR_at_2')
+    katz_dict = nx.katz_centrality_numpy(G_per_year, weight='DR_at_2')
     in_degree_dict = nx.in_degree_centrality(G_per_year)
     out_degree_dict = nx.out_degree_centrality(G_per_year)
     nodes = G_per_year.nodes
@@ -104,7 +104,7 @@ def compute_centrality_measures(G_per_year, year):
                                                     for i in nodes],
                                     'closeness': [closeness_dict[i]
                                                   for i in nodes],
-                                    'degree': [degree_dict[i]
+                                    'katz': [katz_dict[i]
                                                for i in nodes],
                                     'in_degree': [in_degree_dict[i]
                                                   for i in nodes],
@@ -336,7 +336,7 @@ def set_foreign_keys(conn):
         pagerank REAL,
         betweenness REAL,
         closeness REAL,
-        "degree" REAL,
+        katz REAL,
         in_degree REAL,
         out_degreee REAL,
         node_id INTEGER,
