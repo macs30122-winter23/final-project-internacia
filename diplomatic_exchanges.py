@@ -348,7 +348,7 @@ def set_foreign_keys(conn):
         closeness REAL,
         "degree" REAL,
         in_degree REAL,
-        out_degreee REAL,
+        out_degree REAL,
         node_id INTEGER,
         "year" INTEGER,
         FOREIGN KEY("year") REFERENCES diplomatic_exchanges ("year"),
