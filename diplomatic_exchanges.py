@@ -1,32 +1,23 @@
-import csv
-import sys
-
 import jellyfish
 import networkx as nx
 import pandas as pd
-import numpy as np
 import sqlite3
-import matplotlib.pyplot as plt
 import warnings
+
 from sklearn.preprocessing import MinMaxScaler
+
+from crawl_and_scrape import DATA_FOLDER, COUNTRIES_TO_CODES_DICT, \
+    PRESIDENT_VISITS_FNAME, ECONOMIC_DATA_FNAME, DIPLOMATIC_DATA_FNAME, \
+    POWER_DATA_FNAME
 
 warnings.filterwarnings("ignore")
 import os
 
-DATA_FOLDER = './data/'
-DIPLOMATIC_DATA_FNAME = 'Diplomatic_Exchange_2006v1.csv'
+# SQl table names and database name
+DIPLOMATIC_DATA_TABLE_NAME = "diplomatic_exchanges"
+CENTRALITIES_TABLE_NAME = "all_centralities"
+ECONOMIC_DATA_TABLE_NAME = "economic_data"
 DATABASE_NAME = "diplomatic.db"
-TABLE_NAME = "diplomatic_exchanges"
-PRESIDENT_VISITS_FNAME = "AmericanPresidentVisit.csv"
-COW_COUNTRY_CODES_FNAME = "COW-country-codes.csv"
-ECONOMIC_DATA_FNAME = "pwt1001.dta"
-POWER_DATA_FNMAE = "NMC-60-abridged.csv"
-
-with open(f"{DATA_FOLDER}{COW_COUNTRY_CODES_FNAME}", 'r') as f:
-    COUNTRIES_TO_CODES_DICT = {row['StateNme']: int(row['CCode'])
-                               for row in csv.DictReader(f)}
-    CODES_TO_COUNTRIES_DICT = {val: k
-                               for k, val in COUNTRIES_TO_CODES_DICT.items()}
 
 
 def dump_dataframe_to_db(conn, df, name):
@@ -54,23 +45,6 @@ def dump_dataframe_to_db(conn, df, name):
     cur.close()
 
 
-# def country_codes_map():
-#     """
-#     Map country names to country codes
-#
-#     Inputs: None
-#
-#     Returns:
-#          (dict) mapping from country names to country codes
-#                 e.g. {"United States of America": 2}
-#     """
-#     # country codes to country name mapping
-#     with open(f"{DATA_FOLDER}{COW_COUNTRY_CODES_FNAME}", 'r') as f:
-#         country_codes_dict = {row['StateNme']: int(row['CCode'])
-#                               for row in csv.DictReader(f)}
-#     return country_codes_dict
-
-
 def normalize_dataframe(df):
     """
     Normalize dataframe using a MinMax scaler
@@ -88,24 +62,42 @@ def normalize_dataframe(df):
 
 
 def compute_centrality_measures(G_per_year, year):
+    """
+    Computes centrality measures for a given year-graph
+
+    Inputs:
+        - G_per_year (nx.Digraph): the graph of diplomatic connections for
+                                   the given year
+        - year (int): the corresponding year
+
+    Returns:
+        (pandas.DataFrame) a pandas Dataframe containing the centrality measures
+                           node id and year
+    """
     page_rank_scores_dict = nx.pagerank(G_per_year, weight='DR_at_2')
-    betweenness_dict = nx.betweenness_centrality(G_per_year,
+    katz_dict = nx.katz_centrality_numpy(G_per_year, weight='DR_at_2')
+    eigen_dict = nx.eigenvector_centrality(G_per_year.to_undirected(),
+                                           weight='DR_at_2')
+    betweenness_dict = nx.betweenness_centrality(G_per_year.to_undirected(),
                                                  weight='DR_at_2')
     closeness_dict = nx.closeness_centrality(G_per_year.to_undirected(),
                                              distance='DR_at_2')
-    katz_dict = nx.katz_centrality_numpy(G_per_year, weight='DR_at_2')
+
+    degree_dict = nx.degree_centrality(G_per_year.to_undirected())
     in_degree_dict = nx.in_degree_centrality(G_per_year)
     out_degree_dict = nx.out_degree_centrality(G_per_year)
     nodes = G_per_year.nodes
 
     df_centralities = pd.DataFrame({'pagerank': [page_rank_scores_dict[i]
                                                  for i in nodes],
+                                    'eigenvector': [eigen_dict[i]
+                                                    for i in nodes],
+                                    'katz': [katz_dict[i] for i in nodes],
                                     'betweenness': [betweenness_dict[i]
                                                     for i in nodes],
                                     'closeness': [closeness_dict[i]
                                                   for i in nodes],
-                                    'katz': [katz_dict[i]
-                                               for i in nodes],
+                                    'degree': [degree_dict[i] for i in nodes],
                                     'in_degree': [in_degree_dict[i]
                                                   for i in nodes],
                                     'out_degree': [out_degree_dict[i]
@@ -140,10 +132,10 @@ def add_centrality_measures_to_db_for_year(conn, year, centrality_table_name,
     df_centralities = compute_centrality_measures(G_per_year, year)
 
     if to_csv:
-        if not os.path.exists('./data/centrality_measures'):
-            os.mkdir('./data/centrality_measures')
+        if not os.path.exists(f'{DATA_FOLDER}centrality_measures'):
+            os.mkdir(f'{DATA_FOLDER}centrality_measures')
         df_centralities.to_csv(
-            f'./data/centrality_measures/centrality_{year}.csv')
+            f'{DATA_FOLDER}centrality_measures/centrality_{year}.csv')
 
     dump_dataframe_to_db(conn, df_centralities, name=centrality_table_name)
 
@@ -165,7 +157,7 @@ def get_diplomatic_graph(conn, year):
     """
     Once in db get a graph object
     """
-    q = f""" SELECT *  FROM {TABLE_NAME} de 
+    q = f""" SELECT *  FROM {DIPLOMATIC_DATA_TABLE_NAME} de 
              WHERE DE=1 AND DR_at_1 = 3 AND year ={year} AND DR_at_2 != 9
          """
 
@@ -209,11 +201,11 @@ def create_all_centrality_measure_tables(conn, diplomatic_exchanges, to_csv):
                         for table in centrality_table_names])
 
     all_centralities = pd.read_sql(q, conn).drop('index', axis=1)
-    dump_dataframe_to_db(conn, all_centralities, name="all_centralities")
+    dump_dataframe_to_db(conn, all_centralities, name=CENTRALITIES_TABLE_NAME)
 
     if to_csv:
         all_centralities.to_csv(
-            './data/centrality_measures/all_centralities.csv')
+            f'{DATA_FOLDER}centrality_measures/{CENTRALITIES_TABLE_NAME}.csv')
     drop_tables(conn, centrality_table_names)  # drop intermediary tables
 
 
@@ -254,11 +246,7 @@ def add_presidential_visits(conn):
 
     Returns: None
     """
-    president_visits = pd.read_csv(f"{DATA_FOLDER}{PRESIDENT_VISITS_FNAME}",
-                                   names=["destination country",
-                                          "destination city",
-                                          "description", "time", "year",
-                                          "year_aggregate"])
+    president_visits = pd.read_csv(f"{DATA_FOLDER}{PRESIDENT_VISITS_FNAME}")
 
     scraped_countries = set(president_visits['destination country'].values)
 
@@ -322,7 +310,7 @@ def add_economic_data(conn):
     economic_data['ccode'] = economic_data['country'].replace(
         countries_to_codes_dict)
 
-    dump_dataframe_to_db(conn, economic_data, 'economic_data')
+    dump_dataframe_to_db(conn, economic_data, ECONOMIC_DATA_TABLE_NAME)
 
 
 def set_foreign_keys(conn):
@@ -334,11 +322,13 @@ def set_foreign_keys(conn):
         CREATE TABLE all_centralities_new(
         "index" INTEGER PRIMARY KEY,
         pagerank REAL,
+        katz REAL,
+        eigenvector REAL,
         betweenness REAL,
         closeness REAL,
-        katz REAL,
+        "degree" REAL,
         in_degree REAL,
-        out_degreee REAL,
+        out_degree REAL,
         node_id INTEGER,
         "year" INTEGER,
         FOREIGN KEY("year") REFERENCES diplomatic_exchanges ("year"),
@@ -407,9 +397,10 @@ def populate_db(to_csv=True):
     conn = sqlite3.connect(DATABASE_NAME)
 
     diplomatic_exchanges = pd.read_csv(f"{DATA_FOLDER}{DIPLOMATIC_DATA_FNAME}")
-    dump_dataframe_to_db(conn, diplomatic_exchanges, name=TABLE_NAME)
+    dump_dataframe_to_db(conn, diplomatic_exchanges,
+                         name=DIPLOMATIC_DATA_TABLE_NAME)
 
-    power_data = pd.read_csv(f"{DATA_FOLDER}{POWER_DATA_FNMAE}")
+    power_data = pd.read_csv(f"{DATA_FOLDER}{POWER_DATA_FNAME}")
     dump_dataframe_to_db(conn, power_data, 'power_data')
 
     create_all_centrality_measure_tables(conn, diplomatic_exchanges, to_csv)
@@ -462,6 +453,18 @@ def drop_all_tables():
 
 
 def get_data_for_regression(conn, year):
+    """
+    Runs query that aggregates all matched data on presidential visits
+    for a given year.
+
+    Inputs:
+        - conn (sqlite3.Connection) connection to database
+        - year (int) the given year
+
+    Returns:
+        (pandas.DataFrame) the dataframe containing
+                           all the matched info on visits
+    """
     q = f"""
         -- connect president visits with centralities and econ measures
         select * from all_centralities ac 
@@ -476,24 +479,3 @@ def get_data_for_regression(conn, year):
     """
     data = pd.read_sql(q, conn)
     return data
-
-def get_data_for_ols(conn, year):
-    q = f"""
-    select * from all_centralities ac
-    left join (select count(*),year_aggregate,ccode from president_visits 
-                                                where year_aggregate={year}
-                                                group by ccode) as pv
-    on ac.node_id == pv.ccode and ac.year == pv.year_aggregate
-    left join economic_data ed
-    on ed.ccode == ac.node_id and ed.year=ac.year
-    left join power_data
-    on power_data.ccode == ac.node_id and power_data."year" == ac."year"
-    where ac.year= {year}
-    """
-    data = pd.read_sql(q, conn)
-    return data
-
-
-if __name__ == "__main__":
-    drop_all_tables()
-    populate_db()

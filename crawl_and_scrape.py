@@ -1,3 +1,7 @@
+import os
+import urllib
+import zipfile
+
 from bs4 import BeautifulSoup
 import requests
 import csv
@@ -6,14 +10,69 @@ import re
 import pandas as pd
 import math
 
-# Hard coded parameters for secretary and president visits
+# Hard coded parameters for president/secretary visits and pre-exising datasets
+DATA_FOLDER = './data/'
+
+# web-scrapping info
 HEADER = "https://history.state.gov"
 BODY_PRESIDENT = "/departmenthistory/travels/president/"
 BODY_SECRETARY = "/departmenthistory/travels/secretary/"
 URL_PRESIDENT = "https://history.state.gov/departmenthistory/travels/president"
 URL_SECRETARY = "https://history.state.gov/departmenthistory/travels/secretary"
-OUT_FILE_PRESIDENT = "./data/AmericanPresidentVisit.csv"
-OUT_FILE_SECRETARY = "./data/AmericanSecretaryVisit.csv"
+PRESIDENT_VISITS_FNAME = "AmericanPresidentVisit.csv"
+SECRETARY_VISITS_FNAME = "AmericanSecretaryVisit.csv"
+OUT_FILE_PRESIDENT = f"{DATA_FOLDER}{PRESIDENT_VISITS_FNAME}"
+OUT_FILE_SECRETARY = f"{DATA_FOLDER}{SECRETARY_VISITS_FNAME}"
+
+# existing csv/zip dataset links
+COUNTRY_CODES_LINK = "https://correlatesofwar.org/wp-content/uploads/COW-country-codes.csv"
+DIPLOMATIC_DATA_LINK = "https://correlatesofwar.org/wp-content/uploads/Diplomatic_Exchange_2006v1.csv"
+POWER_DATA_LINK = "https://correlatesofwar.org/wp-content/uploads/NMC_Documentation-6.0.zip"
+ECON_DATA_LINK = "https://dataverse.nl/api/access/datafile/354098"
+
+# zip file of power data
+POWER_DATA_ZIPFILE = POWER_DATA_LINK.split('/')[-1]
+
+# csv dataset filenames
+COW_COUNTRY_CODES_FNAME = COUNTRY_CODES_LINK.split('/')[-1]
+DIPLOMATIC_DATA_FNAME = DIPLOMATIC_DATA_LINK.split('/')[-1]
+ECONOMIC_DATA_FNAME = "pwt1001.dta"
+POWER_DATA_FNAME = "NMC-60-abridged.csv"
+
+# download pre-exising datasets
+if not os.path.exists(DATA_FOLDER):
+    # create directory to store data
+    os.mkdir(DATA_FOLDER)
+    for link, fname in zip([COUNTRY_CODES_LINK, DIPLOMATIC_DATA_LINK,
+                            ECON_DATA_LINK],
+                           [COW_COUNTRY_CODES_FNAME, DIPLOMATIC_DATA_FNAME,
+                            ECONOMIC_DATA_FNAME]):
+        response = requests.get(link)
+        with open(f'{DATA_FOLDER}{fname}', "wb") as f:
+            f.write(response.content)
+
+    # get zipped power data
+    urllib.request.urlretrieve(POWER_DATA_LINK,
+                               f'{DATA_FOLDER}{POWER_DATA_ZIPFILE}')
+
+    # extract zip power data in data folder
+    with zipfile.ZipFile(POWER_DATA_ZIPFILE, 'r') as zip_ref:
+        zip_ref.extractall(DATA_FOLDER)
+
+    # extract again the unzipped files
+    zip_files = [f for f in os.listdir(DATA_FOLDER)
+                 if f.endswith('.zip') and f != POWER_DATA_ZIPFILE]
+    for zip_file in zip_files:
+        with zipfile.ZipFile(f'{DATA_FOLDER}{zip_file}', 'r') as zip_ref:
+            zip_ref.extractall(DATA_FOLDER)
+
+# COW mapping from country to code and code to country
+with open(f"{DATA_FOLDER}{COW_COUNTRY_CODES_FNAME}", 'r') as f:
+    COUNTRIES_TO_CODES_DICT = {row['StateNme']: int(row['CCode'])
+                               for row in csv.DictReader(f)}
+    CODES_TO_COUNTRIES_DICT = {val: k
+                               for k, val in
+                               COUNTRIES_TO_CODES_DICT.items()}
 
 
 def get_travel_info(url_header, url_body, url, csv_filename):
@@ -138,11 +197,12 @@ def add_year_columns(csv_filename):
     dataset["year_aggregate"] = dataset["year"].apply(lambda x:
                                                       math.ceil(x / 5) * 5
                                                       )
+    dataset.to_csv(csv_filename, index=False)
 
 
-if __name__ == "__main__":
-    # Call the travel_visit function to obtain the travel information.
-    get_travel_info(HEADER, BODY_PRESIDENT, URL_PRESIDENT, OUT_FILE_PRESIDENT)
-    get_travel_info(HEADER, BODY_SECRETARY, URL_SECRETARY, OUT_FILE_SECRETARY)
-    for csv_file in [OUT_FILE_PRESIDENT, OUT_FILE_SECRETARY]:
-        add_year_columns(csv_file)
+# if __name__ == "__main__":
+#     # Call the travel_visit function to obtain the travel information.
+#     get_travel_info(HEADER, BODY_PRESIDENT, URL_PRESIDENT, OUT_FILE_PRESIDENT)
+#     get_travel_info(HEADER, BODY_SECRETARY, URL_SECRETARY, OUT_FILE_SECRETARY)
+#     for csv_file in [OUT_FILE_PRESIDENT, OUT_FILE_SECRETARY]:
+#         add_year_columns(csv_file)
