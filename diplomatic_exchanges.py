@@ -1,80 +1,23 @@
-import csv
-import urllib
-import zipfile
-
 import jellyfish
 import networkx as nx
 import pandas as pd
 import sqlite3
 import warnings
 
-import requests
 from sklearn.preprocessing import MinMaxScaler
 
-from crawl_and_scrape import DATA_FOLDER
+from crawl_and_scrape import DATA_FOLDER, COUNTRIES_TO_CODES_DICT, \
+    PRESIDENT_VISITS_FNAME, ECONOMIC_DATA_FNAME, DIPLOMATIC_DATA_FNAME, \
+    POWER_DATA_FNAME
 
 warnings.filterwarnings("ignore")
 import os
 
-# SQl table names
+# SQl table names and database name
 DIPLOMATIC_DATA_TABLE_NAME = "diplomatic_exchanges"
 CENTRALITIES_TABLE_NAME = "all_centralities"
 ECONOMIC_DATA_TABLE_NAME = "economic_data"
-
-# dataset links
-COUNTRY_CODES_LINK = "https://correlatesofwar.org/wp-content/uploads/COW-country-codes.csv"
-DIPLOMATIC_DATA_LINK = "https://correlatesofwar.org/wp-content/uploads/Diplomatic_Exchange_2006v1.csv"
-POWER_DATA_LINK = "https://correlatesofwar.org/wp-content/uploads/NMC_Documentation-6.0.zip"
-ECON_DATA_LINK = "https://dataverse.nl/api/access/datafile/354098"
-
-# zip file of power data
-POWER_DATA_ZIPFILE = POWER_DATA_LINK.split('/')[-1]
-
-# dataset filenames
-COW_COUNTRY_CODES_FNAME = COUNTRY_CODES_LINK.split('/')[-1]
-DIPLOMATIC_DATA_FNAME = DIPLOMATIC_DATA_LINK.split('/')[-1]
 DATABASE_NAME = "diplomatic.db"
-PRESIDENT_VISITS_FNAME = "AmericanPresidentVisit.csv"
-ECONOMIC_DATA_FNAME = "pwt1001.dta"
-POWER_DATA_FNAME = "NMC-60-abridged.csv"
-
-# COW mapping from country to code and code to country
-with open(f"{DATA_FOLDER}{COW_COUNTRY_CODES_FNAME}", 'r') as f:
-    COUNTRIES_TO_CODES_DICT = {row['StateNme']: int(row['CCode'])
-                               for row in csv.DictReader(f)}
-    CODES_TO_COUNTRIES_DICT = {val: k
-                               for k, val in COUNTRIES_TO_CODES_DICT.items()}
-
-
-def get_datasets():
-    """
-    Downloads csv files of pre-existing datasets
-
-    Returns: None
-    """
-    data_links = [COUNTRY_CODES_LINK, DIPLOMATIC_DATA_LINK, ECON_DATA_LINK]
-    fnames = [COW_COUNTRY_CODES_FNAME, DIPLOMATIC_DATA_FNAME,
-              ECONOMIC_DATA_FNAME]
-    for link, fname in zip(data_links, fnames):
-        # store csv datasets in data folder
-        response = requests.get(link)
-        with open(f'{DATA_FOLDER}{fname}', "wb") as f:
-            f.write(response.content)
-
-    # get zipped power data
-    urllib.request.urlretrieve(POWER_DATA_LINK,
-                               f'{DATA_FOLDER}{POWER_DATA_ZIPFILE}')
-
-    # extract zip power data in data folder
-    with zipfile.ZipFile(POWER_DATA_ZIPFILE, 'r') as zip_ref:
-        zip_ref.extractall(DATA_FOLDER)
-
-    # extract again the unziped files
-    zip_files = [f for f in os.listdir(DATA_FOLDER)
-                 if f.endswith('.zip') and f != POWER_DATA_ZIPFILE]
-    for zip_file in zip_files:
-        with zipfile.ZipFile(f'{DATA_FOLDER}{zip_file}', 'r') as zip_ref:
-            zip_ref.extractall(DATA_FOLDER)
 
 
 def dump_dataframe_to_db(conn, df, name):
@@ -303,11 +246,7 @@ def add_presidential_visits(conn):
 
     Returns: None
     """
-    president_visits = pd.read_csv(f"{DATA_FOLDER}{PRESIDENT_VISITS_FNAME}",
-                                   names=["destination country",
-                                          "destination city",
-                                          "description", "time", "year",
-                                          "year_aggregate"])
+    president_visits = pd.read_csv(f"{DATA_FOLDER}{PRESIDENT_VISITS_FNAME}")
 
     scraped_countries = set(president_visits['destination country'].values)
 

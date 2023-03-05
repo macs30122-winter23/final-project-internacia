@@ -1,8 +1,9 @@
+destination country,destination city,description,time,year,year_aggregate
 Panama,"Colon, Panama City",Inspected construction of Panama Canal. Met with President Obaldia. [Visit made as President-elect.],"January 29–February 7, 1909",1909,1910
 United Kingdom,Bermuda,Vacation. [Visit made as President-elect.],"November 18–December 13, 1912",1912,1915
 France,"Paris, Chaumont",Attended Preliminary to the Paris Peace Conference. Departed the U.S. December 4.,"December 14–25, 1918",1918,1920
 United Kingdom,"London, Carlisle, Manchester",Met with Prime Minister Lloyd George and King George V.,"December 26–31, 1918",1918,1920
-France,Paris,Stopover en route to Italy.,"December 31, 1918–January 1, 1919",1919,1920
+France,Paris,Stopover en route to Italy.,"December 31, 1918–January 1, 1919",1918,1920
 Italy,"Rome, Genoa, Milan, Turin",Met with King Victor Emnanuel III and Prime Minister Orlando.,"January 1–6, 1919",1919,1920
 Vatican City,,Audience with Pope Benedict XV.,"January 4, 1919",1919,1920
 France,Paris,Attended Paris Peace Conference. Arrived In the U.S. February 24.,"January 7–February 14, 1919",1919,1920
@@ -114,14 +115,16 @@ Philippines,Manila,State visit; met with President Garcia. Traveled by sea from 
 Republic of China,Taipei,Met with President Chiang Kai-shek.,"June 18–19, 1960",1960,1960
 "Korea, Republic of",Seoul,Met with Prime Minister Chung and addressed the National Assembly.,"June 19–20, 1960",1960,1960
 Canada,Ottawa,State visit; addressed joint session of Parliament.,"May 16–18, 1961",1961,1965
-France,Paris,State visit; addressed North Atlantic Council and met with President De Gaulle.,"May 31–June 3, 1961",1961,1965
-Austria,Vienna,Met with President Sehaerf and held talks with Soviet Premier Khrushchev.,"June 3–4, 1961",1961,1965
+France,Paris,"State visit; addressed North Atlantic Council and met with President De
+            Gaulle.","May 31–June 3, 1961",1961,1965
+Austria,Vienna,Met with President Schaerf and held talks with Soviet Premier Khrushchev.,"June 3–4, 1961",1961,1965
 United Kingdom,London,Private visit; met with Queen Elizabeth II and Prime Minister Macmillan.,"June 4–5, 1961",1961,1965
 Venezuela,Caracas,Met with President Betancourt.,"December 16–17, 1961",1961,1965
 Colombia,Bogota,Met with President Lleras Camargo.,"December 17, 1961",1961,1965
 United Kingdom,Bermuda,Met with Prime Minister Macmillan.,"December 21–22, 1961",1961,1965
 Mexico,"Mexico, D.F.",State visit; met with President Lopez Mateos.,"June 29–July 1, 1962",1962,1965
-United Kingdom,Nassau (The Bahamas),Conferred with Prime Minister Macmillan; concluded Nassau agreement on nuclear defense systems.,"December 18–21, 1962",1962,1965
+United Kingdom,Nassau (The Bahamas),"Conferred with Prime Minister Macmillan; concluded Nassau agreement on nuclear
+            defense systems.","December 18–21, 1962",1962,1965
 Costa Rica,San Jose,Attended Conference of Presidents of the Central American Republics.,"March 18–20, 1963",1963,1965
 "Germany, Federal Republic of","Bonn, Cologne, Frankfurt, Wiesbaden",Met with Chancellor Adenauer and other officials.,"June 23–25, 1963",1963,1965
 Germany,West Berlin,Delivered several public addresses.,"June 26, 1963",1963,1965
@@ -216,7 +219,7 @@ Indonesia,Jakarta,Official visit; met with President Suharto.,"December 5–6, 1
 United Kingdom,"London, Newcastle","Attended Economic Summit Meeting May 7-8 of the Heads of State and Government of Canada, France, the Federal Republic of Germany, Italy, Japan, and the United Kingdom. Also met with the Prime Ministers of Greece, Belgium, Turkey, Norway, the Netherlands, and Luxembourg, and with the President of Portugal. Addressed NATO Ministers meeting on May 10.","May 5–10, 1977",1977,1980
 Switzerland,Geneva,Official visit; met with President Furgler. Also met with Syrian President Assad.,"May 9, 1977",1977,1980
 Poland,Warsaw,Official visit; met with First Secretary Gierek.,"December 29–31, 1977",1977,1980
-Iran,Tehran,Official visit; met with Shah Mohammed Reza Pahlavi and King Hussein of Jordan.,"December 31, 1977–January 1, 1978",1978,1980
+Iran,Tehran,Official visit; met with Shah Mohammed Reza Pahlavi and King Hussein of Jordan.,"December 31, 1977–January 1, 1978",1977,1980
 India,"New Delhi, Daulatpur-Nasirabad",Met with President Reddy and Prime Minister Desai. Addressed Parliament.,"January 1–3, 1978",1978,1980
 Saudi Arabia,Riyadh,Met with King Khalid and Crown Prince Fahd.,"January 3–4, 1978",1978,1980
 Egypt,Aswan,Met with President Sadat and German Chancellor Schmidt.,"January 4, 1978",1978,1980
@@ -338,7 +341,7 @@ Spain,Madrid,"Met with Prime Minister Gonzalez, Soviet President Gorbachev and a
 Italy,Rome,Attended NATO Summit Meeting.,"November 6–8, 1991",1991,1995
 Vatican City,,Audience with Pope John Paul II.,"November 8, 1991",1991,1995
 Netherlands,The Hague,Attended European Community Summit Meeting.,"November 8–9, 1991",1991,1995
-Australia,"Sydney, Canberra, Melbourne",Met with Prime Minister Keating and senior Australian officials; addressed the Australian Parliament.,"December 31, 1991–January 3, 1992",1992,1995
+Australia,"Sydney, Canberra, Melbourne",Met with Prime Minister Keating and senior Australian officials; addressed the Australian Parliament.,"December 31, 1991–January 3, 1992",1991,1995
 Singapore,Singapore,Met with President Wee and Prime Minister Goh; attended a meeting of the ASEAN Business Council.,"January 3–5, 1992",1992,1995
 "Korea, Republic of",Seoul,"Met with President Roh and senior Korean officials, signed a science and technology agreement, addressed the Korean National Assembly, and visited U.S. military personnel.","January 5–7, 1992",1992,1995
 Japan,"Kyoto, Kashihara, Tokyo","Met with Emperor Akihito, Prime Minister Miyazawa, and senior Japanese officials.","January 7–10, 1992",1992,1995
@@ -348,7 +351,7 @@ Poland,Warsaw,Met with President Walesa and attended a memorial service for form
 Germany,Munich,"Attended an Economic Summit Meeting with the Heads of State and Government of Canada, France, Germany, Italy, Japan, and the United Kingdom. Also met with Russian President Yeltsin.","July 5–8, 1992",1992,1995
 Finland,Helsinki,Attended a CSCE Summit Meeting.,"July 8–10, 1992",1992,1995
 Saudi Arabia,Riyadh,Met with King Fahd.,"December 31, 1992",1992,1995
-Somalia,"Mogadishu, Baidoa, Baledogle",Visited international relief workers and U.S. military personnel.,"December 31, 1992–January 2, 1993",1993,1995
+Somalia,"Mogadishu, Baidoa, Baledogle",Visited international relief workers and U.S. military personnel.,"December 31, 1992–January 2, 1993",1992,1995
 Russia,Moscow,Signed START II Treaty.,"January 2–3, 1993",1993,1995
 Canada,Vancouver,Summit meeting with Russian President Yeltsin; also met with Prime Minister Mulroney.,"April 3–4, 1993",1993,1995
 Japan,Tokyo,"Attended Economic Summit Meeting with the Heads of State and Government of Canada, France, Germany, Italy, Japan, and the United Kingdom. Also met with Russian President Yeltsin.","July 6–10, 1993",1993,1995
