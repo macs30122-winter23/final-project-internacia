@@ -1,3 +1,5 @@
+import os
+
 from bs4 import BeautifulSoup
 import requests
 import csv
@@ -7,13 +9,18 @@ import pandas as pd
 import math
 
 # Hard coded parameters for secretary and president visits
+DATA_FOLDER = './data/'
+if not os.path.exists(DATA_FOLDER):
+    # create directory to store data
+    os.mkdir(DATA_FOLDER)
+
 HEADER = "https://history.state.gov"
 BODY_PRESIDENT = "/departmenthistory/travels/president/"
 BODY_SECRETARY = "/departmenthistory/travels/secretary/"
 URL_PRESIDENT = "https://history.state.gov/departmenthistory/travels/president"
 URL_SECRETARY = "https://history.state.gov/departmenthistory/travels/secretary"
-OUT_FILE_PRESIDENT = "./data/AmericanPresidentVisit.csv"
-OUT_FILE_SECRETARY = "./data/AmericanSecretaryVisit.csv"
+OUT_FILE_PRESIDENT = f"{DATA_FOLDER}AmericanPresidentVisit.csv"
+OUT_FILE_SECRETARY = f"{DATA_FOLDER}AmericanSecretaryVisit.csv"
 
 
 def get_travel_info(url_header, url_body, url, csv_filename):

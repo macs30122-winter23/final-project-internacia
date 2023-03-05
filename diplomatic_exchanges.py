@@ -1,32 +1,42 @@
 import csv
-import sys
+import urllib
+import zipfile
 
 import jellyfish
 import networkx as nx
 import pandas as pd
-import numpy as np
 import sqlite3
-import matplotlib.pyplot as plt
 import warnings
+
+import requests
 from sklearn.preprocessing import MinMaxScaler
+
+from crawl_and_scrape import DATA_FOLDER
 
 warnings.filterwarnings("ignore")
 import os
-
-# filenames
-DATA_FOLDER = './data/'
-DIPLOMATIC_DATA_FNAME = 'Diplomatic_Exchange_2006v1.csv'
-DATABASE_NAME = "diplomatic.db"
-PRESIDENT_VISITS_FNAME = "AmericanPresidentVisit.csv"
-COW_COUNTRY_CODES_FNAME = "COW-country-codes.csv"
-ECONOMIC_DATA_FNAME = "pwt1001.dta"
-POWER_DATA_FNMAE = "NMC-60-abridged.csv"
 
 # SQl table names
 DIPLOMATIC_DATA_TABLE_NAME = "diplomatic_exchanges"
 CENTRALITIES_TABLE_NAME = "all_centralities"
 ECONOMIC_DATA_TABLE_NAME = "economic_data"
 
+# dataset links
+COUNTRY_CODES_LINK = "https://correlatesofwar.org/wp-content/uploads/COW-country-codes.csv"
+DIPLOMATIC_DATA_LINK = "https://correlatesofwar.org/wp-content/uploads/Diplomatic_Exchange_2006v1.csv"
+POWER_DATA_LINK = "https://correlatesofwar.org/wp-content/uploads/NMC_Documentation-6.0.zip"
+ECON_DATA_LINK = "https://dataverse.nl/api/access/datafile/354098"
+
+# zip file of power data
+POWER_DATA_ZIPFILE = POWER_DATA_LINK.split('/')[-1]
+
+# dataset filenames
+COW_COUNTRY_CODES_FNAME = COUNTRY_CODES_LINK.split('/')[-1]
+DIPLOMATIC_DATA_FNAME = DIPLOMATIC_DATA_LINK.split('/')[-1]
+DATABASE_NAME = "diplomatic.db"
+PRESIDENT_VISITS_FNAME = "AmericanPresidentVisit.csv"
+ECONOMIC_DATA_FNAME = "pwt1001.dta"
+POWER_DATA_FNAME = "NMC-60-abridged.csv"
 
 # COW mapping from country to code and code to country
 with open(f"{DATA_FOLDER}{COW_COUNTRY_CODES_FNAME}", 'r') as f:
@@ -34,6 +44,37 @@ with open(f"{DATA_FOLDER}{COW_COUNTRY_CODES_FNAME}", 'r') as f:
                                for row in csv.DictReader(f)}
     CODES_TO_COUNTRIES_DICT = {val: k
                                for k, val in COUNTRIES_TO_CODES_DICT.items()}
+
+
+def get_datasets():
+    """
+    Downloads csv files of pre-existing datasets
+
+    Returns: None
+    """
+    data_links = [COUNTRY_CODES_LINK, DIPLOMATIC_DATA_LINK, ECON_DATA_LINK]
+    fnames = [COW_COUNTRY_CODES_FNAME, DIPLOMATIC_DATA_FNAME,
+              ECONOMIC_DATA_FNAME]
+    for link, fname in zip(data_links, fnames):
+        # store csv datasets in data folder
+        response = requests.get(link)
+        with open(f'{DATA_FOLDER}{fname}', "wb") as f:
+            f.write(response.content)
+
+    # get zipped power data
+    urllib.request.urlretrieve(POWER_DATA_LINK,
+                               f'{DATA_FOLDER}{POWER_DATA_ZIPFILE}')
+
+    # extract zip power data in data folder
+    with zipfile.ZipFile(POWER_DATA_ZIPFILE, 'r') as zip_ref:
+        zip_ref.extractall(DATA_FOLDER)
+
+    # extract again the unziped files
+    zip_files = [f for f in os.listdir(DATA_FOLDER)
+                 if f.endswith('.zip') and f != POWER_DATA_ZIPFILE]
+    for zip_file in zip_files:
+        with zipfile.ZipFile(f'{DATA_FOLDER}{zip_file}', 'r') as zip_ref:
+            zip_ref.extractall(DATA_FOLDER)
 
 
 def dump_dataframe_to_db(conn, df, name):
@@ -148,10 +189,10 @@ def add_centrality_measures_to_db_for_year(conn, year, centrality_table_name,
     df_centralities = compute_centrality_measures(G_per_year, year)
 
     if to_csv:
-        if not os.path.exists('./data/centrality_measures'):
-            os.mkdir('./data/centrality_measures')
+        if not os.path.exists(f'{DATA_FOLDER}centrality_measures'):
+            os.mkdir(f'{DATA_FOLDER}centrality_measures')
         df_centralities.to_csv(
-            f'./data/centrality_measures/centrality_{year}.csv')
+            f'{DATA_FOLDER}centrality_measures/centrality_{year}.csv')
 
     dump_dataframe_to_db(conn, df_centralities, name=centrality_table_name)
 
@@ -221,7 +262,7 @@ def create_all_centrality_measure_tables(conn, diplomatic_exchanges, to_csv):
 
     if to_csv:
         all_centralities.to_csv(
-            f'./data/centrality_measures/{CENTRALITIES_TABLE_NAME}.csv')
+            f'{DATA_FOLDER}centrality_measures/{CENTRALITIES_TABLE_NAME}.csv')
     drop_tables(conn, centrality_table_names)  # drop intermediary tables
 
 
@@ -417,9 +458,10 @@ def populate_db(to_csv=True):
     conn = sqlite3.connect(DATABASE_NAME)
 
     diplomatic_exchanges = pd.read_csv(f"{DATA_FOLDER}{DIPLOMATIC_DATA_FNAME}")
-    dump_dataframe_to_db(conn, diplomatic_exchanges, name=DIPLOMATIC_DATA_TABLE_NAME)
+    dump_dataframe_to_db(conn, diplomatic_exchanges,
+                         name=DIPLOMATIC_DATA_TABLE_NAME)
 
-    power_data = pd.read_csv(f"{DATA_FOLDER}{POWER_DATA_FNMAE}")
+    power_data = pd.read_csv(f"{DATA_FOLDER}{POWER_DATA_FNAME}")
     dump_dataframe_to_db(conn, power_data, 'power_data')
 
     create_all_centrality_measure_tables(conn, diplomatic_exchanges, to_csv)
