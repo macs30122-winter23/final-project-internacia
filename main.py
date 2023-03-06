@@ -10,5 +10,4 @@ for csv_file in [OUT_FILE_PRESIDENT, OUT_FILE_SECRETARY]:
     add_year_columns(csv_file)
 
 # # clean/match data, create and populate database
-drop_all_tables()
 populate_db()
