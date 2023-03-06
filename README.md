@@ -27,7 +27,7 @@ We aggregate all our datasets in an sqlite database and answer our research ques
 Finally, we provide a visualization of the diplomatic network. 
 
 ## Data-sources
-[Correlates of War Dataset](https://correlatesofwar.org/data-sets/cow-war/):
+[Correlates of War Datasets](https://correlatesofwar.org/data-sets/cow-war/):
 - [Diplomatic exchange data](https://correlatesofwar.org/wp-content/uploads/Diplomatic_Exchange_2006v1.csv)
 - [Power data](https://correlatesofwar.org/wp-content/uploads/NMC_Documentation-6.0.zip)
 
@@ -62,14 +62,18 @@ Note that `diplomatic_exchanges.py` not only creates and populates an SQLite dat
 
 We also provide two jupyter notebooks:
 - Network visualization
-	- The `exploratory_analysis.ipynb` provides code that examines the diplomatic network. It also outputs gephi files for our final network visualization.
+	- The `exploratory_network_analysis.ipynb` provides code that examines the diplomatic network. It also outputs gephi files for our final network visualization.
 -  Modelling
 	- The `regression_analysis.ipynb` contains code that gets linked data on presidential visits across time from the database and  runs multiple logistic regression models to evaluate our hypothesis.
 
 # Tasks
 
+- Data cleaning: Loizos, Roberto (`diplomatic_exchanges.py`)
+- Data scraping: Loizos, Yutao (`crawl_and_scrape.py`)
+- Modeling: Loizos, Yutao, Roberto (`regression_analysis.ipynb`, `exploratory_network_analysis.ipynb`)
+
 # Slides
-A link to our slides can be found here:
+A link to our slides can be found here: [In-calss Presentation](https://docs.google.com/presentation/d/10uHFiROGbgd4S3oHWDEHCDJ1DFwYqUrF/edit?usp=sharing&ouid=103200593994749874848&rtpof=true&sd=true)
 
 # Video
 A link to our video can be found here
