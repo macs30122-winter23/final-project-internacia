@@ -36,7 +36,7 @@ Finally, we provide a visualization of the diplomatic network.
 [Scraped data - Presidential visits](https://history.state.gov/departmenthistory/travels/president)
 
 ## Library requirements
-All of our conda environment requirements can be found in the `cond_env.yaml` file.
+All of our conda environment requirements can be found in the `cond_env.yml` file.
 We briefly list our dependencies:
 - `matplotlib=3.6.2=py38haa95532_0`
 - `pandas=1.5.2=py38hf11a4ad_0`
