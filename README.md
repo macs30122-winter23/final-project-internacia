@@ -73,7 +73,7 @@ We also provide two jupyter notebooks:
 - Modeling: Loizos, Yutao, Roberto (`regression_analysis.ipynb`, `exploratory_network_analysis.ipynb`)
 
 # Slides
-A link to our slides can be found here: [In-calss Presentation](https://docs.google.com/presentation/d/1-jXy8YLsqMQQBUWH2TPsABMJPtoY0TBQ8QDnlLAUPsw/edit?usp=sharing)
+A link to our slides can be found here: [In-calss Presentation](https://docs.google.com/presentation/d/10uHFiROGbgd4S3oHWDEHCDJ1DFwYqUrF/edit?usp=sharing&ouid=103200593994749874848&rtpof=true&sd=true)
 
 # Video
 A link to our video can be found here
