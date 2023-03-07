@@ -76,4 +76,4 @@ We also provide two jupyter notebooks:
 A link to our slides can be found here: [In-calss Presentation](https://docs.google.com/presentation/d/10uHFiROGbgd4S3oHWDEHCDJ1DFwYqUrF/edit?usp=sharing&ouid=103200593994749874848&rtpof=true&sd=true)
 
 # Video
-A link to our video can be found here
+A link to our video can be found here: [Code-walk-through](https://youtu.be/8VCyx5lt-0I)
